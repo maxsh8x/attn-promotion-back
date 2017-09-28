@@ -11,15 +11,15 @@ export class CreateMetricsParams {
   data: DataItem
 }
 
-const allowedSources = ['google', 'fb']
+const allowedSources = ['google', 'facebook', 'vk', 'instagram', 'yandex']
 
 @Service()
 export class MetricsRepository {
-  async getYMetrics(url: string) {
+  async getYMetrics(url: string, yDate = 'yesterday') {
     const response = await axios().get('', {
       params: {
-        date1: 'yesterday',
-        date2: 'yesterday',
+        date1: yDate,
+        date2: yDate,
         pretty: false,
         metrics: 'ym:s:pageviews,ym:s:pageDepth,ym:s:avgVisitDurationSeconds,ym:s:bounceRate',
         dimensions: 'ym:s:UTMSource,ym:s:startURL',
@@ -47,6 +47,7 @@ export class MetricsRepository {
       ] = params.data[type]
       return {
         date: params.date,
+        page: params.pageID,
         pageviews,
         pageDepth,
         avgVisitDurationSeconds,
@@ -54,14 +55,15 @@ export class MetricsRepository {
         type
       }
     })
-    return items
-    // const pipeline: any[] = [
-
-    // ]
-    // return Metrics
-    //   .aggregate(pipeline)
-    //   .exec()
+    return Metrics.create(items)
   }
 
-
+  getAll(pageID: number, limit: number, offset: number): any {
+    return Metrics
+      .find({ page: pageID }, '-page -__v')
+      .limit(limit)
+      .skip(offset)
+      .lean()
+      .exec()
+  }
 }
