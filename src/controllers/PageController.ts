@@ -2,7 +2,7 @@ import { Service } from 'typedi'
 import {
   Get, Post, Body, JsonController, QueryParams, Authorized
 } from 'routing-controllers'
-import { IsUrl, IsString } from 'class-validator'
+import { IsUrl, IsString, IsPositive } from 'class-validator'
 
 import { PageRepository } from '../repository/PageRepository'
 import { getTitle } from '../utils/page'
@@ -18,6 +18,14 @@ export class CreatePageParams {
 export class GetPageTitleParams {
   @IsUrl()
   url: string
+}
+
+export class GetPagesParams {
+  @IsPositive()
+  offset: string
+
+  @IsPositive()
+  limit: string
 }
 
 @Service()
@@ -43,5 +51,17 @@ export class PageController {
     ) {
     const title = await getTitle(params.url)
     return { title }
+  }
+
+  @Get('/v1/page/')
+  async getPages(
+    @QueryParams() params: GetPagesParams
+    ) {
+    const { limit, offset } = params
+    const data = await this.pageRepository.getAll(
+      parseInt(limit, 10),
+      parseInt(offset, 10)
+    )
+    return data
   }
 }

@@ -1,7 +1,6 @@
 import { Service } from 'typedi'
 import { Page } from '../models/Page'
 
-// Add refresh tokens
 @Service()
 export class PageRepository {
   create(params: any): any {
@@ -13,5 +12,14 @@ export class PageRepository {
       .findById(pageID)
       .lean()
       .exec()
+  }
+
+  getAll(limit: number, offset: number): any {
+    return Page
+    .find({}, '_id createdAt url title')
+    .limit(limit)
+    .skip(offset)
+    .lean()
+    .exec()
   }
 }

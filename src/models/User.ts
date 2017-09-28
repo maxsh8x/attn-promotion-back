@@ -1,6 +1,9 @@
 import * as mongoose from 'mongoose'
 import { ROLES_ARRAY, ROLES_TYPE } from '../constants'
 
+// TODO: fix old @types
+const AutoIncrement = require('mongoose-sequence')(mongoose)
+
 interface IData extends mongoose.Document {
   _id: number
   username: string
@@ -31,5 +34,9 @@ const Data = new mongoose.Schema(
     minimize: true
   }
 )
+
+Data.plugin(AutoIncrement, {
+  id: 'user_seq'
+})
 
 export const User = mongoose.model<IData & mongoose.Document>('User', Data)

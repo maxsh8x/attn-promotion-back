@@ -2,10 +2,11 @@ import { Service } from 'typedi'
 import {
   Get, Post, Body, JsonController, Authorized, NotFoundError, HttpCode, QueryParams
 } from 'routing-controllers'
-import { IsPositive } from 'class-validator'
+import { IsPositive, IsString } from 'class-validator'
 
 import { MetricsRepository } from '../repository/MetricsRepository'
 import { PageRepository } from '../repository/PageRepository'
+import { metricSources, metricFields } from '../constants'
 
 export class UpdateMetricsParams {
   @IsPositive()
@@ -13,14 +14,18 @@ export class UpdateMetricsParams {
 }
 
 export class GetMetricsParams {
+  // TODO: check is date
+  @IsString()
+  yDate: string
+
   @IsPositive()
   pageID: number
 
-  @IsPositive()
-  limit: string
+  // @IsPositive()
+  // limit: string
 
-  @IsPositive()
-  offset: string
+  // @IsPositive()
+  // offset: string
 }
 
 @Service()
@@ -56,11 +61,14 @@ export class MetricsController {
   async getMetrics(
     @QueryParams() params: GetMetricsParams
     ) {
-    const { limit, offset, pageID } = params
-    return await this.metricsRepository.getAll(
-      pageID,
-      parseInt(limit, 10),
-      parseInt(offset, 10)
-    )
+    const { yDate, pageID } = params
+    const data = await this.metricsRepository.getMetrics(yDate, pageID)
+    return metricFields.map(metric => {
+      const item: any = { metric }
+      for (let i = 0; i < data.length; i++) {
+        item[data[i]['type']] = data[i][metric]
+      }
+      return item
+    })
   }
 }

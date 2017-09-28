@@ -1,6 +1,7 @@
 import { Service } from 'typedi'
 import { Metrics } from '../models/Metrics'
 import axios from '../utils/fetcher'
+import { metricSources } from '../constants'
 
 export class DataItem {
   [name: string]: Array<number>
@@ -11,7 +12,6 @@ export class CreateMetricsParams {
   data: DataItem
 }
 
-const allowedSources = ['google', 'facebook', 'vk', 'instagram', 'yandex']
 
 @Service()
 export class MetricsRepository {
@@ -30,7 +30,7 @@ export class MetricsRepository {
     const data: any = {}
     response.data.data.forEach((item: any) => {
       const sourceName = item.dimensions[0].name
-      if (allowedSources.indexOf(sourceName) !== -1) {
+      if (metricSources.indexOf(sourceName) !== -1) {
         data[sourceName] = item.metrics
       }
     })
@@ -58,11 +58,12 @@ export class MetricsRepository {
     return Metrics.create(items)
   }
 
-  getAll(pageID: number, limit: number, offset: number): any {
+  getMetrics(yDate: string, pageID: number): any {
     return Metrics
-      .find({ page: pageID }, '-page -__v')
-      .limit(limit)
-      .skip(offset)
+      .find(
+      { date: yDate, page: pageID, type: { $in: metricSources } },
+      'pageviews pageDepth avgVisitDurationSeconds bounceRate type'
+      )
       .lean()
       .exec()
   }

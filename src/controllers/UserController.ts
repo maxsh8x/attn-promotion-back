@@ -66,9 +66,8 @@ export class UserController {
   }
 
   // TODO: zxcvbn
-  @Authorized(['root'])
+  // @Authorized(['root'])
   @Post('/v1/user')
-  @HttpCode(204)
   async createUser( @Body() params: CreateUserParams) {
     const { username, email, role, password } = params
     const userFound = await this.userRepository.findByUsername(username)
@@ -82,9 +81,10 @@ export class UserController {
       salt,
       iterations,
       email,
-      active: false,
+      active: true,
       role: role as ROLES_TYPE
     })
     await this.userRepository.initCache(_id, { balance })
+    return 'ok'
   }
 }
