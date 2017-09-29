@@ -26,6 +26,9 @@ export class GetPagesParams {
 
   @IsPositive()
   limit: string
+
+  @IsString()
+  yDate: string
 }
 
 @Service()
@@ -57,8 +60,9 @@ export class PageController {
   async getPages(
     @QueryParams() params: GetPagesParams
     ) {
-    const { limit, offset } = params
+    const { yDate, limit, offset } = params
     const data = await this.pageRepository.getAll(
+      yDate,
       parseInt(limit, 10),
       parseInt(offset, 10)
     )

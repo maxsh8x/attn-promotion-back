@@ -14,12 +14,18 @@ export class PageRepository {
       .exec()
   }
 
-  getAll(limit: number, offset: number): any {
+  getAll(yDate: string, limit: number, offset: number): any {
     return Page
-    .find({}, '_id createdAt url title')
-    .limit(limit)
-    .skip(offset)
-    .lean()
-    .exec()
+      .find({}, '_id createdAt url title')
+      .limit(limit)
+      .skip(offset)
+      .populate({
+        path: 'data',
+        match: {
+          date: yDate
+        }
+      })
+      .lean()
+      .exec()
   }
 }

@@ -4,12 +4,13 @@ const AutoIncrement = require('mongoose-sequence')(mongoose)
 
 interface IData extends mongoose.Document {
   _id: number
-  name: string
-  page: Object
+  type: string
+  page: number
   pageviews: number
   pageDepth: number
   avgVisitDurationSeconds: number
   bounceRate: number
+  date: Date
 }
 
 const Data = new mongoose.Schema(

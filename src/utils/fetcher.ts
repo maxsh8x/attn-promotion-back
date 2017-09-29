@@ -7,7 +7,8 @@ const getInstance = () => axios.create({
   baseURL: config.apiURL,
   params: {
     ids: config.counterID,
-    oauth_token: config.tokenOAuth
+    oauth_token: config.tokenOAuth,
+    pretty: false
   }
 })
 

@@ -6,11 +6,14 @@ import { IsPositive, IsString } from 'class-validator'
 
 import { MetricsRepository } from '../repository/MetricsRepository'
 import { PageRepository } from '../repository/PageRepository'
-import { metricSources, metricFields } from '../constants'
+import { byMetric } from '../utils/metrics'
 
 export class UpdateMetricsParams {
   @IsPositive()
   pageID: number
+
+  @IsString()
+  yDate: string
 }
 
 export class GetMetricsParams {
@@ -41,13 +44,13 @@ export class MetricsController {
   async updateMetrics(
     @Body() params: UpdateMetricsParams
     ) {
-    const { pageID } = params
+    const { pageID, yDate } = params
     const pageData = await this.pageRepository.getOne(pageID)
     if (pageData === null) {
       throw new NotFoundError('PageID not found')
     }
     const { url } = pageData
-    const data = await this.metricsRepository.getYMetrics(url)
+    const data = await this.metricsRepository.getYMetrics(url, yDate)
     if (Object.keys(data.data).length) {
       await this.metricsRepository.createMetrics({
         ...data,
@@ -63,12 +66,6 @@ export class MetricsController {
     ) {
     const { yDate, pageID } = params
     const data = await this.metricsRepository.getMetrics(yDate, pageID)
-    return metricFields.map(metric => {
-      const item: any = { metric }
-      for (let i = 0; i < data.length; i++) {
-        item[data[i]['type']] = data[i][metric]
-      }
-      return item
-    })
+    return byMetric(data)
   }
 }

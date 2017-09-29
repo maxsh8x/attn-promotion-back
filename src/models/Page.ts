@@ -25,4 +25,11 @@ Data.plugin(AutoIncrement, {
   id: 'page_seq'
 })
 
+Data.virtual('data', {
+  ref: 'Metrics',
+  localField: '_id',
+  foreignField: 'page',
+  justOne: false
+})
+
 export const Page = mongoose.model<IData & mongoose.Document>('Page', Data)
