@@ -29,11 +29,12 @@ export class MetricsRepository {
       ...basicParams,
       dimensions: 'ym:s:<attribution>TrafficSource'
     }
+
     const { data: networksData } = await axios().get('', { params: networks })
     const { data: metaData } = await axios().get('', { params: meta })
     const { data: total } = await axios().get('', { params: basicParams })
 
-    const date = Date.parse(networksData.data.query.date1)
+    const date = Date.parse(networksData.query.date1)
     const data: any = {}
 
     const extractData = ([dataSource, fieldName]: [any, string]) =>

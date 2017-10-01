@@ -51,7 +51,7 @@ export class MetricsController {
     }
     const { url } = pageData
     const data = await this.metricsRepository.getYMetrics(url, yDate)
-    if (Object.keys(data.data).length) {
+    if (Object.keys(data.data).length > 0) {
       await this.metricsRepository.createMetrics({
         ...data,
         pageID

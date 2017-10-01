@@ -2,9 +2,10 @@ import { Service } from 'typedi'
 import {
   Get, Post, Body, JsonController, QueryParams, Authorized
 } from 'routing-controllers'
-import { IsUrl, IsString, IsPositive } from 'class-validator'
+import { IsUrl, IsString, IsPositive, IsBoolean } from 'class-validator'
 
 import { PageRepository } from '../repository/PageRepository'
+import { MetricsRepository } from '../repository/MetricsRepository'
 import { getTitle } from '../utils/page'
 
 export class CreatePageParams {
@@ -18,6 +19,11 @@ export class CreatePageParams {
 export class GetPageTitleParams {
   @IsUrl()
   url: string
+}
+
+export class CountParams {
+  @IsBoolean()
+  active: boolean
 }
 
 export class GetPagesParams {
@@ -35,7 +41,8 @@ export class GetPagesParams {
 @JsonController()
 export class PageController {
   constructor(
-    private pageRepository: PageRepository
+    private pageRepository: PageRepository,
+    private metricsRepository: MetricsRepository,
   ) { }
 
   // @Authorized(['root'])
@@ -44,8 +51,16 @@ export class PageController {
     @Body() params: CreatePageParams
     ) {
     const { url, title } = params
-    const data = await this.pageRepository.create({ url, title })
-    return { pageID: data._id }
+    // TODO: check if exist
+    const { _id: pageID } = await this.pageRepository.create({ url, title })
+    const metricsData = await this.metricsRepository.getYMetrics(url)
+    if (Object.keys(metricsData.data).length > 0) {
+      await this.metricsRepository.createMetrics({
+        ...metricsData,
+        pageID
+      })
+    }
+    return { pageID }
   }
 
   @Get('/v1/page/title')
@@ -54,6 +69,15 @@ export class PageController {
     ) {
     const title = await getTitle(params.url)
     return { title }
+  }
+
+  @Get('/v1/page/count')
+  async count(
+    @QueryParams() params: CountParams
+    ) {
+    const { active } = params
+    const count = await this.pageRepository.count(active)
+    return count
   }
 
   @Get('/v1/page/')

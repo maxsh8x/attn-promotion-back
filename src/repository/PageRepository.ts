@@ -14,9 +14,9 @@ export class PageRepository {
       .exec()
   }
 
-  getAll(yDate: string, limit: number, offset: number): any {
+  getAll(yDate: string, limit: number, offset: number, active = true): any {
     return Page
-      .find({}, '_id createdAt url title')
+      .find({ active }, '_id createdAt url title')
       .limit(limit)
       .skip(offset)
       .populate({
@@ -27,5 +27,11 @@ export class PageRepository {
       })
       .lean()
       .exec()
+  }
+
+  count(active = true): any {
+    return Page.count({
+      active
+    })
   }
 }
