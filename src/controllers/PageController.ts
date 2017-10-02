@@ -2,10 +2,11 @@ import { Service } from 'typedi'
 import {
   Get, Post, Body, JsonController, QueryParams, Authorized
 } from 'routing-controllers'
-import { IsUrl, IsString, IsPositive, IsBoolean } from 'class-validator'
+import { IsUrl, IsString, IsPositive, IsBooleanString } from 'class-validator'
 
 import { PageRepository } from '../repository/PageRepository'
 import { MetricsRepository } from '../repository/MetricsRepository'
+import { InputRepository } from '../repository/InputRepository'
 import { getTitle } from '../utils/page'
 
 export class CreatePageParams {
@@ -16,14 +17,15 @@ export class CreatePageParams {
   title: string
 }
 
+// TODO: report bug queryparam validation
 export class GetPageTitleParams {
   @IsUrl()
   url: string
 }
 
 export class CountParams {
-  @IsBoolean()
-  active: boolean
+  @IsBooleanString()
+  active: string
 }
 
 export class GetPagesParams {
@@ -35,6 +37,9 @@ export class GetPagesParams {
 
   @IsString()
   yDate: string
+
+  @IsBooleanString()
+  active: string
 }
 
 @Service()
@@ -43,6 +48,7 @@ export class PageController {
   constructor(
     private pageRepository: PageRepository,
     private metricsRepository: MetricsRepository,
+    private inputRepository: InputRepository
   ) { }
 
   // @Authorized(['root'])
@@ -76,7 +82,8 @@ export class PageController {
     @QueryParams() params: CountParams
     ) {
     const { active } = params
-    const count = await this.pageRepository.count(active)
+    const isActive = (active === 'true');
+    const count = await this.pageRepository.count(isActive)
     return count
   }
 
@@ -84,11 +91,16 @@ export class PageController {
   async getPages(
     @QueryParams() params: GetPagesParams
     ) {
-    const { yDate, limit, offset } = params
-    const data = await this.pageRepository.getAll(
-      yDate,
+    const { yDate, limit, offset, active } = params
+    const isActive = (active === 'true');
+    const pageIDs = await this.pageRepository.getIDs(
       parseInt(limit, 10),
-      parseInt(offset, 10)
+      parseInt(offset, 10),
+      isActive
+    )
+    const data = await this.inputRepository.getByPageIDs(
+      pageIDs.map((item: any) => item._id),
+      yDate
     )
     return data
   }

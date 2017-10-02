@@ -6,7 +6,9 @@ import { IsPositive, IsString } from 'class-validator'
 
 import { MetricsRepository } from '../repository/MetricsRepository'
 import { PageRepository } from '../repository/PageRepository'
+import { InputRepository } from '../repository/InputRepository'
 import { byMetric } from '../utils/metrics'
+import { bySource } from '../utils/input'
 
 export class UpdateMetricsParams {
   @IsPositive()
@@ -36,7 +38,8 @@ export class GetMetricsParams {
 export class MetricsController {
   constructor(
     private metricsRepository: MetricsRepository,
-    private pageRepository: PageRepository
+    private pageRepository: PageRepository,
+    private inputRepository: InputRepository
   ) { }
 
   // @Authorized(['root'])
@@ -65,7 +68,11 @@ export class MetricsController {
     @QueryParams() params: GetMetricsParams
     ) {
     const { yDate, pageID } = params
-    const data = await this.metricsRepository.getMetrics(yDate, pageID)
-    return byMetric(data)
+    const yandex = await this.metricsRepository.getMetrics(yDate, pageID)
+    const input = await this.inputRepository.getByPageDate(yDate, pageID)
+    return {
+      yandex: byMetric(yandex),
+      input: bySource(input)
+    }
   }
 }

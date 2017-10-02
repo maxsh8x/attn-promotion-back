@@ -14,18 +14,28 @@ export class PageRepository {
       .exec()
   }
 
-  getAll(yDate: string, limit: number, offset: number, active = true): any {
+  getIDs(limit: number, offset: number, active: boolean): any {
+    // return Page
+    // .find({ active }, '_id createdAt url title')
+    // .limit(limit)
+    // .skip(offset)
+    // .populate({
+    //   path: 'input',
+    //   match: {
+    //     date: yDate
+    //   },
+    //   select: '-_id page source type value'
+    // })
+    // .lean()
+    // .exec()
+    const pipeline: any = [
+      { $match: { active } },
+      { $group: { _id: '$_id' } },
+      { $skip: offset },
+      { $limit: limit }
+    ]
     return Page
-      .find({ active }, '_id createdAt url title')
-      .limit(limit)
-      .skip(offset)
-      .populate({
-        path: 'data',
-        match: {
-          date: yDate
-        }
-      })
-      .lean()
+      .aggregate(pipeline)
       .exec()
   }
 

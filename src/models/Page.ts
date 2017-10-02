@@ -26,8 +26,8 @@ Data.plugin(AutoIncrement, {
   id: 'page_seq'
 })
 
-Data.virtual('data', {
-  ref: 'Metrics',
+Data.virtual('input', {
+  ref: 'Input',
   localField: '_id',
   foreignField: 'page',
   justOne: false

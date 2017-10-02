@@ -1,7 +1,7 @@
 import * as mongoose from 'mongoose'
 
 interface IData extends mongoose.Document {
-  _id: number
+  source: string
   type: string
   page: number
   date: Date
@@ -10,7 +10,7 @@ interface IData extends mongoose.Document {
 
 const Data = new mongoose.Schema(
   {
-    _id: Number,
+    source: { type: String, required: true },
     type: { type: String, required: true },
     page: { type: Number, ref: 'Page', required: true },
     date: { type: Date, required: true },
@@ -24,7 +24,7 @@ const Data = new mongoose.Schema(
 )
 
 Data.index(
-  { 'type': 1, 'page': 1, 'date': 1 },
+  { source: 1, type: 1, page: 1, date: 1 },
   { unique: true }
 )
 
