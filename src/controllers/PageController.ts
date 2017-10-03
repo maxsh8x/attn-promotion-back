@@ -108,10 +108,14 @@ export class PageController {
       pages.map((item: any) => item._id),
       yDate
     )
+    const activePages = await this.pageRepository.count(true)
+    const inactivePages = await this.pageRepository.count(false)
     return {
       pages,
       input,
-      metricNetworks
+      metricNetworks,
+      activePages,
+      inactivePages
     }
   }
 
@@ -121,7 +125,7 @@ export class PageController {
     @Body() params: UpdateStatusParams
   ) {
     const { active } = params
-    const x = await this.pageRepository.updateStatus(pageID, active)
+    await this.pageRepository.updateStatus(pageID, active)
     return 'ok'
   }
 }

@@ -3,7 +3,6 @@ import {
   Get, Post, Body, JsonController, Authorized, NotFoundError, HttpCode, QueryParams
 } from 'routing-controllers'
 import { IsPositive, IsString, IsInt } from 'class-validator'
-import { bySource } from '../utils/input'
 import { InputRepository } from '../repository/InputRepository'
 
 export class UpdateInputParams {
