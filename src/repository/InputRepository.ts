@@ -21,7 +21,7 @@ export class InputRepository {
   }
 
   getByPageIDs(pageIDs: number[], yDate: string): any {
-    const date = new Date(yDate);
+    const date = new Date(yDate)
     const pipeline = [
       { $match: { date, page: { $in: pageIDs } } },
       {
@@ -37,25 +37,6 @@ export class InputRepository {
           sources: { $push: '$_id.source' },
           cost: { $push: '$cost' },
           clicks: { $push: '$clicks' }
-        }
-      },
-      {
-        $lookup: {
-          from: 'pages',
-          localField: '_id.page',
-          foreignField: '_id',
-          as: 'page_doc'
-        }
-      },
-      { $unwind: '$page_doc' },
-      {
-        $project: {
-          _id: '$_id.page',
-          url: '$page_doc.url',
-          title: '$page_doc.title',
-          sources: 1,
-          cost: 1,
-          clicks: 1,
         }
       }
     ]

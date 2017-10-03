@@ -8,6 +8,7 @@ import { PageRepository } from '../repository/PageRepository'
 import { MetricsRepository } from '../repository/MetricsRepository'
 import { InputRepository } from '../repository/InputRepository'
 import { getTitle } from '../utils/page'
+import { metricNetworks } from '../constants'
 
 export class CreatePageParams {
   @IsUrl()
@@ -92,16 +93,20 @@ export class PageController {
     @QueryParams() params: GetPagesParams
     ) {
     const { yDate, limit, offset, active } = params
-    const isActive = (active === 'true');
-    const pageIDs = await this.pageRepository.getIDs(
+    const isActive = (active === 'true')
+    const pages = await this.pageRepository.getAll(
       parseInt(limit, 10),
       parseInt(offset, 10),
       isActive
     )
-    const data = await this.inputRepository.getByPageIDs(
-      pageIDs.map((item: any) => item._id),
+    const input = await this.inputRepository.getByPageIDs(
+      pages.map((item: any) => item._id),
       yDate
     )
-    return data
+    return {
+      pages,
+      input,
+      metricNetworks
+    }
   }
 }
