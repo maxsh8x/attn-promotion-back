@@ -16,16 +16,20 @@ export class PageRepository {
 
   getAll(limit: number, offset: number, active: boolean): any {
     return Page
-    .find({ active }, '_id createdAt url title')
-    .limit(limit)
-    .skip(offset)
-    .lean()
-    .exec()
+      .find({ active }, '_id createdAt url title active')
+      .limit(limit)
+      .skip(offset)
+      .lean()
+      .exec()
   }
 
   count(active = true): any {
     return Page.count({
       active
     })
+  }
+
+  updateStatus(pageID: number, active: boolean): any {
+    return Page.findByIdAndUpdate(pageID, { active })
   }
 }

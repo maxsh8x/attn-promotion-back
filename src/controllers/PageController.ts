@@ -1,8 +1,8 @@
 import { Service } from 'typedi'
 import {
-  Get, Post, Body, JsonController, QueryParams, Authorized
+  Get, Post, Body, JsonController, QueryParams, Authorized, Patch, Param
 } from 'routing-controllers'
-import { IsUrl, IsString, IsPositive, IsBooleanString } from 'class-validator'
+import { IsUrl, IsString, IsPositive, IsBooleanString, IsBoolean } from 'class-validator'
 
 import { PageRepository } from '../repository/PageRepository'
 import { MetricsRepository } from '../repository/MetricsRepository'
@@ -22,6 +22,11 @@ export class CreatePageParams {
 export class GetPageTitleParams {
   @IsUrl()
   url: string
+}
+
+export class UpdateStatusParams {
+  @IsBoolean()
+  active: boolean
 }
 
 export class CountParams {
@@ -108,5 +113,15 @@ export class PageController {
       input,
       metricNetworks
     }
+  }
+
+  @Patch('/v1/page/:pageID/status')
+  async updateStatus(
+    @Param('pageID') pageID: number,
+    @Body() params: UpdateStatusParams
+  ) {
+    const { active } = params
+    const x = await this.pageRepository.updateStatus(pageID, active)
+    return 'ok'
   }
 }

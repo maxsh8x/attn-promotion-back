@@ -24,12 +24,6 @@ export class GetMetricsParams {
 
   @IsPositive()
   pageID: number
-
-  // @IsPositive()
-  // limit: string
-
-  // @IsPositive()
-  // offset: string
 }
 
 @Service()
