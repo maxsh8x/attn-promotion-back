@@ -21,15 +21,6 @@ export class PageRepository {
     .skip(offset)
     .lean()
     .exec()
-    // const pipeline: any = [
-    //   { $match: { active } },
-    //   { $group: { _id: '$_id' } },
-    //   { $skip: offset },
-    //   { $limit: limit }
-    // ]
-    // return Page
-    //   .aggregate(pipeline)
-    //   .exec()
   }
 
   count(active = true): any {

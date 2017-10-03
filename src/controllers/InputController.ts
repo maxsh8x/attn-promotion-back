@@ -1,9 +1,9 @@
 import { Service } from 'typedi'
 import {
-  Post, Body, JsonController, Authorized, NotFoundError, HttpCode, QueryParams
+  Get, Post, Body, JsonController, Authorized, NotFoundError, HttpCode, QueryParams
 } from 'routing-controllers'
-import { IsPositive, IsString } from 'class-validator'
-
+import { IsPositive, IsString, IsInt } from 'class-validator'
+import { bySource } from '../utils/input'
 import { InputRepository } from '../repository/InputRepository'
 
 export class UpdateInputParams {
@@ -19,8 +19,17 @@ export class UpdateInputParams {
   @IsString()
   yDate: string
 
-  @IsPositive()
+  @IsInt()
   value: number
+}
+
+export class GetInputParams {
+  // TODO: check is date
+  @IsString()
+  yDate: string
+
+  @IsPositive()
+  pageID: number
 }
 
 @Service()
