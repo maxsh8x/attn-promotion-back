@@ -36,6 +36,8 @@ export class UserController {
     private userRepository: UserRepository,
     private tokenRepository: TokenRepository
   ) { }
+
+  @Authorized(['root'])
   @Post('/v1/login')
   async login( @Body() params: LoginParams) {
     const { username, password } = params
@@ -66,7 +68,7 @@ export class UserController {
   }
 
   // TODO: zxcvbn
-  // @Authorized(['root'])
+  @Authorized(['root'])
   @Post('/v1/user')
   async createUser( @Body() params: CreateUserParams) {
     const { username, email, role, password } = params

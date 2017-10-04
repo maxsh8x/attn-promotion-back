@@ -38,7 +38,7 @@ export class MetricsController {
     private inputRepository: InputRepository
   ) { }
 
-  // @Authorized(['root'])
+  @Authorized(['root'])
   @Post('/v1/input')
   async updateInput(
     @Body() params: UpdateInputParams

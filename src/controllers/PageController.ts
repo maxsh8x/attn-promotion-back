@@ -57,7 +57,7 @@ export class PageController {
     private inputRepository: InputRepository
   ) { }
 
-  // @Authorized(['root'])
+  @Authorized(['root'])
   @Post('/v1/page')
   async createPage(
     @Body() params: CreatePageParams
@@ -87,6 +87,7 @@ export class PageController {
     return { title }
   }
 
+  @Authorized(['root'])
   @Get('/v1/page/count')
   async count(
     @QueryParams() params: CountParams
@@ -97,6 +98,7 @@ export class PageController {
     return count
   }
 
+  @Authorized(['root'])
   @Get('/v1/page/')
   async getPages(
     @QueryParams() params: GetPagesParams

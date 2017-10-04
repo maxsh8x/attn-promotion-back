@@ -35,7 +35,7 @@ export class MetricsController {
     private inputRepository: InputRepository
   ) { }
 
-  // @Authorized(['root'])
+  @Authorized(['root'])
   @Post('/v1/metrics')
   async updateMetrics(
     @Body() params: UpdateMetricsParams
@@ -56,6 +56,7 @@ export class MetricsController {
     return 'ok'
   }
 
+  @Authorized(['root'])
   @Get('/v1/metrics')
   async getMetrics(
     @QueryParams() params: GetMetricsParams
