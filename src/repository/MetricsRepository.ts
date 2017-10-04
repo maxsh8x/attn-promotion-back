@@ -90,4 +90,52 @@ export class MetricsRepository {
       .lean()
       .exec()
   }
+
+  lineChart(startDate: string, endDate: string, pages: number[]) {
+    const pipeline = [
+      {
+        $match: {
+          page: { $in: pages },
+          date: {
+            $gte: new Date(startDate),
+            $lte: new Date(endDate)
+          },
+          type: 'ad'
+        }
+      },
+      {
+        $lookup: {
+          from: 'pages',
+          localField: 'page',
+          foreignField: '_id',
+          as: 'page_doc'
+        }
+      },
+      {
+        $group: {
+          _id: {
+            page: '$page',
+            date: '$date'
+          },
+          label: { $first: '$page_doc.title' },
+          data: {
+            $push: {
+              x: { $dateToString: { format: '%Y-%m-%d', date: '$date' } },
+              y: '$pageviews'
+            }
+          }
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          label: { $arrayElemAt: ['$label', 0] },
+          data: 1
+        }
+      }
+    ]
+    return Metrics
+      .aggregate(pipeline)
+      .exec()
+  }
 }

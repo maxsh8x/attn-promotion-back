@@ -38,6 +38,10 @@ export class PageRepository {
       .exec()
   }
 
+  getPagesByURLs(urls: string[]): any {
+    return Page.distinct('_id', { url: { $in: urls } })
+  }
+
   updateStatus(pageID: number, active: boolean): any {
     return Page.findByIdAndUpdate(pageID, { active })
   }
