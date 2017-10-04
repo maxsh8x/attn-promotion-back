@@ -9,6 +9,9 @@ class Config {
   mongoDB: string
 
   @IsString()
+  agendaMongoDB: string
+
+  @IsString()
   redis: string
 
   @IsString()

@@ -63,14 +63,18 @@ export class PageController {
     @Body() params: CreatePageParams
     ) {
     const { url, title } = params
-    // TODO: check if exist
-    const { _id: pageID } = await this.pageRepository.create({ url, title })
+    const data = await this.pageRepository.create({ url, title })
+    const { _id: pageID } = data
     const metricsData = await this.metricsRepository.getYMetrics(url)
     if (Object.keys(metricsData.data).length > 0) {
-      await this.metricsRepository.createMetrics({
-        ...metricsData,
-        pageID
-      })
+      try {
+        await this.metricsRepository.createMetrics([{
+          ...metricsData,
+          pageID
+        }])
+      } catch (e) {
+        // TODO: sentry
+      }
     }
     return { pageID }
   }
@@ -123,7 +127,7 @@ export class PageController {
   async updateStatus(
     @Param('pageID') pageID: number,
     @Body() params: UpdateStatusParams
-  ) {
+    ) {
     const { active } = params
     await this.pageRepository.updateStatus(pageID, active)
     return 'ok'

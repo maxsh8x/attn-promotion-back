@@ -4,7 +4,9 @@ import { Page } from '../models/Page'
 @Service()
 export class PageRepository {
   create(params: any): any {
-    return Page.create(params)
+    return Page.findOne({ url: params.url }).then(
+      (doc: any) => doc ? doc : Page.create(params)
+    )
   }
 
   getOne(pageID: number): any {
@@ -27,6 +29,13 @@ export class PageRepository {
     return Page.count({
       active
     })
+  }
+
+  getActivePagesURL(): any {
+    return Page
+      .find({ active: true }, '_id url')
+      .lean()
+      .exec()
   }
 
   updateStatus(pageID: number, active: boolean): any {

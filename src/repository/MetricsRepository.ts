@@ -60,25 +60,25 @@ export class MetricsRepository {
     return { date, data }
   }
 
-  createMetrics(params: any): any {
-    const items = Object.keys(params.data).map(type => {
-      const [
-        pageviews,
-        pageDepth,
-        avgVisitDurationSeconds,
-        bounceRate
-      ] = params.data[type]
-      return {
-        date: params.date,
-        page: params.pageID,
-        pageviews,
-        pageDepth,
-        avgVisitDurationSeconds,
-        bounceRate,
-        type
+  createMetrics(items: any[]): any {
+    // const bulk = Metrics.collection.initializeUnorderedBulkOp()
+    const docs = []
+    for (let i = 0; i < items.length; i++) {
+      const keys = Object.keys(items[i].data)
+      for (let x = 0; x < keys.length; x++) {
+        const sourceMetrics = items[i].data[keys[x]]
+        docs.push({
+          date: items[i].date,
+          page: items[i].pageID,
+          pageviews: sourceMetrics[0],
+          pageDepth: sourceMetrics[1],
+          avgVisitDurationSeconds: sourceMetrics[2],
+          bounceRate: sourceMetrics[3],
+          type: keys[x]
+        })
       }
-    })
-    return Metrics.create(items)
+    }
+    return Metrics.insertMany(docs, { ordered: false })
   }
 
   getMetrics(yDate: string, pageID: number): any {

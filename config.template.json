@@ -1,6 +1,7 @@
 {
   "port": 3000,
-  "mongoDB": "mongodb://localhost/myapp",
+  "mongoDB": "mongodb://localhost/crm",
+  "agendaMongoDB": "mongodb://localhost/agenda",
   "redis": "redis://127.0.0.1:6380/4",
   "secret": "RANDOM_STRING",
   "counterID": 991919191,

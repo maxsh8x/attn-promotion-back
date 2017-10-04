@@ -1,9 +1,11 @@
 import 'reflect-metadata'
 import * as mongoose from 'mongoose'
 import * as bluebird from 'bluebird'
+import * as Agenda from 'agenda'
 import { createKoaServer, useContainer } from 'routing-controllers'
 import { Container } from 'typedi'
 import { getAppConfig, validateConfig } from './utils/config'
+import { task } from './utils/task'
 import { authorizationChecker, currentUserChecker } from './utils/middlewares'
 
 (mongoose as any).Promise = bluebird
@@ -36,6 +38,17 @@ useContainer(Container);
   await mongoose.connect(config.mongoDB, {
     useMongoClient: true
   })
+
+  const agenda = new Agenda({ db: { address: config.agendaMongoDB } })
+  agenda.define('update metrics', (job, done) => {
+    task.updateAllMetrics(job, done)
+  })
+
+  agenda.on('ready', () => {
+    agenda.every('0 8 * * *', 'update metrics')
+    agenda.start()
+  })
+
   koaApp.listen(config.port)
   console.info(`Server is up and running at port ${config.port}`)
 })()
