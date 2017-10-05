@@ -47,6 +47,7 @@ export class MetricsController {
     private inputRepository: InputRepository
   ) { }
 
+  @HttpCode(204)
   @Authorized(['root'])
   @Post('/v1/metrics')
   async updateMetrics(
@@ -65,7 +66,8 @@ export class MetricsController {
         pageID
       }])
     }
-    return 'ok'
+    // TODO: issue
+    return ''
   }
 
   @Authorized(['root'])

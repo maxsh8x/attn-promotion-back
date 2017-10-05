@@ -37,7 +37,6 @@ export class UserController {
     private tokenRepository: TokenRepository
   ) { }
 
-  @Authorized(['root'])
   @Post('/v1/login')
   async login( @Body() params: LoginParams) {
     const { username, password } = params
@@ -68,6 +67,7 @@ export class UserController {
   }
 
   // TODO: zxcvbn
+  @HttpCode(204)
   @Authorized(['root'])
   @Post('/v1/user')
   async createUser( @Body() params: CreateUserParams) {
@@ -87,6 +87,7 @@ export class UserController {
       role: role as ROLES_TYPE
     })
     await this.userRepository.initCache(_id, { balance })
-    return 'ok'
+    // TODO: issue
+    return ''
   }
 }

@@ -62,7 +62,11 @@ export class PageController {
   async createPage(
     @Body() params: CreatePageParams
     ) {
-    const { url, title } = params
+    const { url } = params
+    let { title } = params
+    if (title.length === 0) {
+      title = await getTitle(url)
+    }
     const data = await this.pageRepository.create({ url, title })
     const { _id: pageID } = data
     const metricsData = await this.metricsRepository.getYMetrics(url)

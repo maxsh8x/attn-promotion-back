@@ -1,6 +1,6 @@
 import { Service } from 'typedi'
 import {
-  Get, Post, Body, JsonController, Authorized, NotFoundError, HttpCode, QueryParams
+  Post, Body, JsonController, Authorized, HttpCode
 } from 'routing-controllers'
 import { IsPositive, IsString, IsInt } from 'class-validator'
 import { InputRepository } from '../repository/InputRepository'
@@ -38,6 +38,7 @@ export class MetricsController {
     private inputRepository: InputRepository
   ) { }
 
+  @HttpCode(204)
   @Authorized(['root'])
   @Post('/v1/input')
   async updateInput(
@@ -57,6 +58,7 @@ export class MetricsController {
       yDate,
       value
     })
-    return 'ok'
+    // TODO: issue
+    return ''
   }
 }
