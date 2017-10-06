@@ -2,7 +2,7 @@ import { Service } from 'typedi'
 import {
   Get, Post, Body, JsonController, Authorized, NotFoundError, HttpCode, QueryParams
 } from 'routing-controllers'
-import { IsPositive, IsString, IsUrl, IsISO8601 } from 'class-validator'
+import { IsPositive, IsString, IsUrl, IsISO8601, IsNumberString } from 'class-validator'
 
 import { MetricsRepository } from '../repository/MetricsRepository'
 import { PageRepository } from '../repository/PageRepository'
@@ -21,8 +21,8 @@ export class GetMetricsParams {
   @IsString()
   yDate: string
 
-  @IsPositive()
-  pageID: number
+  @IsNumberString()
+  pageID: string
 }
 
 export class LineChartParams {
@@ -66,8 +66,6 @@ export class MetricsController {
         pageID
       }])
     }
-    // TODO: issue
-    return ''
   }
 
   @Authorized(['root'])
@@ -76,7 +74,7 @@ export class MetricsController {
     @QueryParams() params: GetMetricsParams
     ) {
     const { yDate, pageID } = params
-    const data = await this.metricsRepository.getMetrics(yDate, pageID)
+    const data = await this.metricsRepository.getMetrics(yDate, parseInt(pageID, 10))
     const result = byMetric(data)
     return result
   }

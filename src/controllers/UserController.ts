@@ -87,7 +87,5 @@ export class UserController {
       role: role as ROLES_TYPE
     })
     await this.userRepository.initCache(_id, { balance })
-    // TODO: issue
-    return ''
   }
 }

@@ -2,7 +2,7 @@ import { Service } from 'typedi'
 import {
   Get, Post, Body, JsonController, QueryParams, Authorized, Patch, Param
 } from 'routing-controllers'
-import { IsUrl, IsString, IsPositive, IsBooleanString, IsBoolean } from 'class-validator'
+import { IsUrl, IsString, IsBooleanString, IsBoolean, IsNumberString } from 'class-validator'
 
 import { PageRepository } from '../repository/PageRepository'
 import { MetricsRepository } from '../repository/MetricsRepository'
@@ -35,10 +35,10 @@ export class CountParams {
 }
 
 export class GetPagesParams {
-  @IsPositive()
+  @IsNumberString()
   offset: string
 
-  @IsPositive()
+  @IsNumberString()
   limit: string
 
   @IsString()
@@ -46,6 +46,9 @@ export class GetPagesParams {
 
   @IsBooleanString()
   active: string
+
+  @IsString()
+  filter: string
 }
 
 @Service()
@@ -107,12 +110,13 @@ export class PageController {
   async getPages(
     @QueryParams() params: GetPagesParams
     ) {
-    const { yDate, limit, offset, active } = params
+    const { yDate, limit, offset, filter, active } = params
     const isActive = (active === 'true')
     const pages = await this.pageRepository.getAll(
       parseInt(limit, 10),
       parseInt(offset, 10),
-      isActive
+      isActive,
+      filter
     )
     const input = await this.inputRepository.getByPageIDs(
       pages.map((item: any) => item._id),

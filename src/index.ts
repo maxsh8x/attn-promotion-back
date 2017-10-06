@@ -2,7 +2,7 @@ import 'reflect-metadata'
 import * as mongoose from 'mongoose'
 import * as bluebird from 'bluebird'
 import * as Agenda from 'agenda'
-import { createKoaServer, useContainer } from 'routing-controllers'
+import { createExpressServer, useContainer } from 'routing-controllers'
 import { Container } from 'typedi'
 import { getAppConfig, validateConfig } from './utils/config'
 import { task } from './utils/task'
@@ -21,7 +21,7 @@ useContainer(Container);
   }
   const config = getAppConfig()
   // TODO: declare controllers manual
-  const koaApp = createKoaServer({
+  const expressApp = createExpressServer({
     controllers: [`${__dirname}/controllers/*.*`],
     authorizationChecker,
     currentUserChecker,
@@ -30,7 +30,7 @@ useContainer(Container);
     cors: true
   })
 
-  koaApp.on('error', (err: Error) => {
+  expressApp.on('error', (err: Error) => {
     if (process.env.NODE_ENV !== 'production') {
       console.error(err)
     }
@@ -49,6 +49,6 @@ useContainer(Container);
     agenda.start()
   })
 
-  koaApp.listen(config.port)
+  expressApp.listen(config.port)
   console.info(`Server is up and running at port ${config.port}`)
 })()

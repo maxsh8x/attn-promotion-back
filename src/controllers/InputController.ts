@@ -58,7 +58,5 @@ export class MetricsController {
       yDate,
       value
     })
-    // TODO: issue
-    return ''
   }
 }

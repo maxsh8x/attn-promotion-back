@@ -1,10 +1,15 @@
 import { Action } from 'routing-controllers'
+import * as LRU from 'lru-cache'
 import { ROLES_TYPE } from '../constants'
 import { verifyJWT } from '../utils/jwt'
 import { TokenRepository } from '../repository/TokenRepository'
 
 // TODO: Dependency injection
 const tokenRepository = new TokenRepository()
+
+const cache = LRU({
+  maxAge: 1000 * 60 * 60
+})
 
 export async function authorizationChecker(action: Action, roles: ROLES_TYPE[]) {
   const token = action.request.headers['authorization']
@@ -21,7 +26,7 @@ export async function authorizationChecker(action: Action, roles: ROLES_TYPE[]) 
           (roles.find(role => userRole === role))
         ))
       ) {
-        action.context.user = verifiedData
+        cache.set(token, verifiedData)
         return true
       }
     }
@@ -30,5 +35,6 @@ export async function authorizationChecker(action: Action, roles: ROLES_TYPE[]) 
 }
 
 export async function currentUserChecker(action: Action) {
-  return action.context.user
+  const token = action.request.headers['authorization']
+  return cache.get(token)
 }

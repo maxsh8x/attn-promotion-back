@@ -16,9 +16,12 @@ export class PageRepository {
       .exec()
   }
 
-  getAll(limit: number, offset: number, active: boolean): any {
+  getAll(limit: number, offset: number, active: boolean, filter: string): any {
+    const query = filter
+      ? { $text: { $search: filter } }
+      : {}
     return Page
-      .find({ active }, '_id createdAt url title active')
+      .find({ ...query, active }, '_id createdAt url title active')
       .limit(limit)
       .skip(offset)
       .lean()

@@ -33,4 +33,8 @@ Data.virtual('input', {
   justOne: false
 })
 
+Data.index({
+  title: 'text'
+})
+
 export const Page = mongoose.model<IData & mongoose.Document>('Page', Data)
