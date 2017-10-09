@@ -138,4 +138,21 @@ export class MetricsRepository {
       .aggregate(pipeline)
       .exec()
   }
+
+  promotionChart(startDate: string, endDate: string, pageID: number) {
+    const pipeline = [
+      {
+        $match: {
+          page: pageID,
+          date: {
+            $gte: new Date(startDate),
+            $lte: new Date(endDate)
+          },
+        }
+      },
+    ]
+    return Metrics
+      .aggregate(pipeline)
+      .exec()
+  }
 }

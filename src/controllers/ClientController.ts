@@ -2,7 +2,7 @@ import { Service } from 'typedi'
 import {
   Get, Post, Body, JsonController, QueryParams, Authorized, HttpCode
 } from 'routing-controllers'
-import { IsString, IsNumberString, IsOptional } from 'class-validator'
+import { IsString, IsNumberString } from 'class-validator'
 import { ClientRepository } from '../repository/ClientRepository'
 
 export class GetClientsParams {
@@ -12,7 +12,6 @@ export class GetClientsParams {
   @IsNumberString()
   limit: string
 
-  @IsOptional()
   @IsString()
   filter: string
 }

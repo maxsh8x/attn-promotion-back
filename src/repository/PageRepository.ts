@@ -24,11 +24,9 @@ export class PageRepository {
       .exec()
   }
 
-  getByClient(client: number, limit: number, offset: number): any {
+  getByClient(client: number): any {
     return Page
-      .find({ client }, '_id active url')
-      .limit(limit)
-      .skip(offset)
+      .find({ client }, '_id active url title')
       .lean()
       .exec()
   }

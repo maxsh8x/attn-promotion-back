@@ -18,7 +18,7 @@ export class UpdateMetricsParams {
 }
 
 export class GetMetricsParams {
-  @IsString()
+  @IsISO8601()
   yDate: string
 
   @IsNumberString()
@@ -36,6 +36,17 @@ export class LineChartParams {
     each: true
   })
   urls: string[]
+}
+
+export class PromotionChartParams {
+  @IsISO8601()
+  startDate: string
+
+  @IsISO8601()
+  endDate: string
+
+  @IsNumberString()
+  pageID: string
 }
 
 @Service()
@@ -87,6 +98,20 @@ export class MetricsController {
     const { startDate, endDate, urls } = params
     const pages = await this.pageRepository.getPagesByURLs(urls)
     const data = await this.metricsRepository.lineChart(startDate, endDate, pages)
+    return { data }
+  }
+
+  @Authorized(['root'])
+  @Get('/v1/metrics/promotionChart')
+  async promotionChart(
+    @QueryParams() params: PromotionChartParams
+    ) {
+    const { startDate, endDate, pageID } = params
+    const data = await this.metricsRepository.promotionChart(
+      startDate,
+      endDate,
+      parseInt(pageID, 10)
+    )
     return { data }
   }
 }

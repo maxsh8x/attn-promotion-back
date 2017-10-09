@@ -21,7 +21,6 @@ export class CreatePageParams {
   clientID: string
 }
 
-// TODO: report bug queryparam validation
 export class GetPageTitleParams {
   @IsUrl()
   url: string
@@ -58,12 +57,6 @@ export class GetPagesParams {
 }
 
 export class GetClientPagesParams {
-  @IsNumberString()
-  offset: string
-
-  @IsNumberString()
-  limit: string
-
   @IsNumberString()
   clientID: string
 }
@@ -160,11 +153,9 @@ export class PageController {
   async getClientPages(
     @QueryParams() params: GetClientPagesParams
     ) {
-    const { limit, offset, clientID } = params
+    const { clientID } = params
     const data = await this.pageRepository.getByClient(
-      parseInt(clientID, 10),
-      parseInt(limit, 10),
-      parseInt(offset, 10)
+      parseInt(clientID, 10)
     )
     return data
   }
