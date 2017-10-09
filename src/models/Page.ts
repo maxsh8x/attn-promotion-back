@@ -13,7 +13,8 @@ const Data = new mongoose.Schema(
     _id: Number,
     url: { type: String, required: true, unique: true },
     title: { type: String, required: true },
-    active: { type: Boolean, default: true }
+    active: { type: Boolean, default: true },
+    client: { type: Number, default: true }
   },
   {
     _id: false,

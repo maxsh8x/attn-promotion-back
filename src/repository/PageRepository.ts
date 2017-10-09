@@ -1,6 +1,14 @@
 import { Service } from 'typedi'
 import { Page } from '../models/Page'
 
+interface IGetAllParams {
+  limit: number,
+  offset: number,
+  active: boolean,
+  filter: string,
+  clients: number[]
+}
+
 @Service()
 export class PageRepository {
   create(params: any): any {
@@ -16,10 +24,23 @@ export class PageRepository {
       .exec()
   }
 
-  getAll(limit: number, offset: number, active: boolean, filter: string): any {
-    const query = filter
+  getByClient(client: number, limit: number, offset: number): any {
+    return Page
+      .find({ client }, '_id active url')
+      .limit(limit)
+      .skip(offset)
+      .lean()
+      .exec()
+  }
+
+  getAll(params: IGetAllParams): any {
+    const { limit, offset, active, filter, clients } = params
+    const query: any = filter
       ? { $text: { $search: filter } }
       : {}
+    if (clients.length > 0) {
+      query.client = { $in: clients }
+    }
     return Page
       .find({ ...query, active }, '_id createdAt url title active')
       .limit(limit)

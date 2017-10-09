@@ -1948,9 +1948,9 @@ rimraf@2, rimraf@^2.5.1, rimraf@^2.6.1:
   dependencies:
     glob "^7.0.5"
 
-routing-controllers@^0.7.3:
-  version "0.7.3"
-  resolved "https://registry.yarnpkg.com/routing-controllers/-/routing-controllers-0.7.3.tgz#d418a83be87ad1581d347d2177d5b9987e5453ee"
+routing-controllers@^0.7.4:
+  version "0.7.4"
+  resolved "https://registry.yarnpkg.com/routing-controllers/-/routing-controllers-0.7.4.tgz#fc46db2ff5e6b4b77dded78debb4b2af299f7546"
   dependencies:
     class-transformer "~0.1.6"
     class-validator "^0.7.0"
