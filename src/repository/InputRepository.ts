@@ -1,5 +1,7 @@
 import { Service } from 'typedi'
 import { Input } from '../models/Input'
+import { CHART_INTERVAL_TYPE } from '../constants'
+import { getCostPipeline } from '../utils/metrics'
 
 interface IUpdateMetricsParams {
   source: string
@@ -7,6 +9,13 @@ interface IUpdateMetricsParams {
   pageID: number
   yDate: string
   value: number
+}
+
+interface IGetCostChartParams {
+  startDate: string,
+  endDate: string,
+  interval: CHART_INTERVAL_TYPE,
+  pageID: number
 }
 
 @Service()
@@ -69,6 +78,22 @@ export class InputRepository {
       { upsert: true }
     )
       .lean()
+      .exec()
+  }
+
+  getCostChart(params: IGetCostChartParams) {
+    const { startDate, endDate, interval, pageID } = params
+    const pipeline = getCostPipeline({
+      startDate,
+      endDate,
+      interval,
+      pageID,
+      byField: 'value',
+      matchType: 'cost'
+    })
+
+    return Input
+      .aggregate(pipeline)
       .exec()
   }
 }

@@ -2,6 +2,8 @@ import { Service } from 'typedi'
 import { Metrics } from '../models/Metrics'
 import axios from '../utils/fetcher'
 import { metricSources } from '../constants'
+import { CHART_INTERVAL_TYPE } from '../constants'
+import { getCostPipeline } from '../utils/metrics'
 
 export class DataItem {
   [name: string]: Array<number>
@@ -10,6 +12,13 @@ export class DataItem {
 export class CreateMetricsParams {
   date: Date
   data: DataItem
+}
+
+interface IGetCostChartParams {
+  startDate: string,
+  endDate: string,
+  interval: CHART_INTERVAL_TYPE,
+  pageID: number
 }
 
 @Service()
@@ -139,18 +148,17 @@ export class MetricsRepository {
       .exec()
   }
 
-  promotionChart(startDate: string, endDate: string, pageID: number) {
-    const pipeline = [
-      {
-        $match: {
-          page: pageID,
-          date: {
-            $gte: new Date(startDate),
-            $lte: new Date(endDate)
-          },
-        }
-      },
-    ]
+  getCostChart(params: IGetCostChartParams) {
+    const { startDate, endDate, interval, pageID } = params
+    const pipeline = getCostPipeline({
+      startDate,
+      endDate,
+      interval,
+      pageID,
+      byField: 'pageviews',
+      matchType: 'ad'
+    })
+
     return Metrics
       .aggregate(pipeline)
       .exec()

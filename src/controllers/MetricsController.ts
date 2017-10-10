@@ -7,7 +7,8 @@ import { IsPositive, IsString, IsUrl, IsISO8601, IsNumberString } from 'class-va
 import { MetricsRepository } from '../repository/MetricsRepository'
 import { PageRepository } from '../repository/PageRepository'
 import { InputRepository } from '../repository/InputRepository'
-import { byMetric } from '../utils/metrics'
+import { byMetric, convertToDate } from '../utils/metrics'
+import { CHART_INTERVAL_TYPE } from '../constants'
 
 export class UpdateMetricsParams {
   @IsPositive()
@@ -47,6 +48,10 @@ export class PromotionChartParams {
 
   @IsNumberString()
   pageID: string
+
+  // TODO: enum
+  @IsString()
+  interval: CHART_INTERVAL_TYPE
 }
 
 @Service()
@@ -106,12 +111,28 @@ export class MetricsController {
   async promotionChart(
     @QueryParams() params: PromotionChartParams
     ) {
-    const { startDate, endDate, pageID } = params
-    const data = await this.metricsRepository.promotionChart(
+    const { startDate, endDate, pageID, interval } = params
+    const chartParams = {
       startDate,
       endDate,
-      parseInt(pageID, 10)
-    )
-    return { data }
+      interval,
+      pageID: parseInt(pageID, 10)
+    }
+    const metrics = await this.metricsRepository.getCostChart(chartParams)
+    const inputs = await this.inputRepository.getCostChart(chartParams)
+
+    const metricsMap: { [s: string]: any } = {}
+    for (let i = 0; i < metrics.length; i++) {
+      metricsMap[`${metrics[i].primary}_${metrics[i].secondary}`] = {
+        date: convertToDate(
+          metrics[i].primary,
+          metrics[i].secondary - 1,
+          interval
+        ),
+        value: metrics[i].value
+      }
+    }
+    // console.log(metricsMap)
+    return { metrics, inputs }
   }
 }
