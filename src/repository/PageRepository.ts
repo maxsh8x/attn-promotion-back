@@ -26,7 +26,7 @@ export class PageRepository {
 
   getByClient(client: number): any {
     return Page
-      .find({ client }, '_id active url title')
+      .find({ client }, '_id active url title type')
       .lean()
       .exec()
   }
@@ -40,7 +40,7 @@ export class PageRepository {
       query.client = { $in: clients }
     }
     return Page
-      .find({ ...query, active }, '_id createdAt url title active')
+      .find({ ...query, active }, '_id createdAt url title active type')
       .limit(limit)
       .skip(offset)
       .lean()

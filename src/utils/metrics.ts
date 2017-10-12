@@ -1,6 +1,13 @@
 import { metricFields, CHART_INTERVAL_TYPE } from '../constants'
 import * as moment from 'moment'
 
+moment.updateLocale('en', {
+  week: {
+    dow: 1,
+    doy: 1
+  }
+})
+
 interface IGetCostPipelineParams {
   startDate: string,
   endDate: string,
@@ -24,8 +31,6 @@ const getIntervalGroupParams = (interval: CHART_INTERVAL_TYPE) => {
   switch (interval) {
     case 'days':
       return { primary: '$year', secondary: '$dayOfYear' }
-    case 'weeks':
-      return { primary: '$year', secondary: '$isoWeek' }
     case 'months':
       return { primary: '$year', secondary: '$month' }
     default:
@@ -38,8 +43,8 @@ export const convertToDate = (
   secondary: number,
   interval: CHART_INTERVAL_TYPE
 ) => {
-  return moment(`${primary}`)
-    .add(secondary, interval)
+  return moment(`${primary}`, 'YYYY')
+    .add(secondary - 1, interval)
     .format('DD-MM-YYYY')
 }
 
@@ -59,7 +64,6 @@ export const getCostPipeline = (params: IGetCostPipelineParams) => {
       $project: {
         year: { $year: '$date' },
         month: { $month: '$date' },
-        isoWeek: { $isoWeek: '$date' },
         dayOfYear: { $dayOfYear: '$date' },
         value: `$${params.byField}`
       }

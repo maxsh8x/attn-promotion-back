@@ -1519,6 +1519,10 @@ mongodb@2.2.31, mongodb@^2.2.10:
     mongodb-core "2.1.15"
     readable-stream "2.2.7"
 
+mongoose-lean-id@^0.1.0:
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/mongoose-lean-id/-/mongoose-lean-id-0.1.0.tgz#cad1d6a30131c291ca678c3c5872e72d535c51d6"
+
 mongoose-sequence@^4.0.0:
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/mongoose-sequence/-/mongoose-sequence-4.0.0.tgz#5426026d9df701639d4a09d9d5d38c36f4609579"

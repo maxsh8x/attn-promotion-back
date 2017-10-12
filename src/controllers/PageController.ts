@@ -2,13 +2,13 @@ import { Service } from 'typedi'
 import {
   Get, Post, Body, JsonController, QueryParams, Authorized, Patch, Param
 } from 'routing-controllers'
-import { IsUrl, IsString, IsBooleanString, IsBoolean, IsNumberString, IsPositive } from 'class-validator'
+import { IsUrl, IsString, IsBooleanString, IsBoolean, IsNumberString, IsPositive, IsIn } from 'class-validator'
 
 import { PageRepository } from '../repository/PageRepository'
 import { MetricsRepository } from '../repository/MetricsRepository'
 import { InputRepository } from '../repository/InputRepository'
 import { getTitle } from '../utils/page'
-import { metricNetworks } from '../constants'
+import { metricNetworks, QUESTION_VARIANT_TYPE, QUESTION_VARIANT_ARRAY } from '../constants'
 
 export class CreatePageParams {
   @IsUrl()
@@ -19,6 +19,9 @@ export class CreatePageParams {
 
   @IsPositive()
   clientID: string
+
+  @IsIn(QUESTION_VARIANT_ARRAY)
+  type: QUESTION_VARIANT_TYPE
 }
 
 export class GetPageTitleParams {
@@ -75,12 +78,12 @@ export class PageController {
   async createPage(
     @Body() params: CreatePageParams
     ) {
-    const { url, clientID: client } = params
+    const { url, clientID: client, type } = params
     let { title } = params
     if (title.length === 0) {
       title = await getTitle(url)
     }
-    const data = await this.pageRepository.create({ url, title, client })
+    const data = await this.pageRepository.create({ url, title, client, type })
     const { _id: pageID } = data
     const metricsData = await this.metricsRepository.getYMetrics(url)
     if (Object.keys(metricsData.data).length > 0) {

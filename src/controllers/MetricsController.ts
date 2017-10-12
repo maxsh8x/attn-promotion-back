@@ -121,18 +121,35 @@ export class MetricsController {
     const metrics = await this.metricsRepository.getCostChart(chartParams)
     const inputs = await this.inputRepository.getCostChart(chartParams)
 
-    const metricsMap: { [s: string]: any } = {}
-    for (let i = 0; i < metrics.length; i++) {
-      metricsMap[`${metrics[i].primary}_${metrics[i].secondary}`] = {
-        date: convertToDate(
-          metrics[i].primary,
-          metrics[i].secondary - 1,
-          interval
-        ),
-        value: metrics[i].value
+    const arrToMap = (arr: any[]) => {
+      const result: { [s: string]: any } = {}
+      for (let i = 0; i < arr.length; i++) {
+        result[`${arr[i].primary}_${arr[i].secondary}`] = {
+          value: arr[i].value,
+          primary: arr[i].primary,
+          secondary: arr[i].secondary
+        }
+      }
+      return result
+    }
+
+    const metricsMap = arrToMap(metrics)
+    const inputsMap = arrToMap(inputs)
+
+    // TODO: check
+    const result = []
+    for (let prop in metricsMap) {
+      if (prop in inputsMap) {
+        result.push({
+          x: convertToDate(
+            metricsMap[prop].primary,
+            metricsMap[prop].secondary,
+            interval
+          ),
+          y: inputsMap[prop].value / metricsMap[prop].value
+        })
       }
     }
-    // console.log(metricsMap)
-    return { metrics, inputs }
+    return result
   }
 }
