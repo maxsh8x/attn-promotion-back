@@ -2,16 +2,10 @@ import { Service } from 'typedi'
 import {
   Get, Post, Body, JsonController, QueryParams, Authorized, HttpCode
 } from 'routing-controllers'
-import { IsString, IsNumberString } from 'class-validator'
+import { IsString } from 'class-validator'
 import { ClientRepository } from '../repository/ClientRepository'
 
 export class GetClientsParams {
-  @IsNumberString()
-  offset: string
-
-  @IsNumberString()
-  limit: string
-
   @IsString()
   filter: string
 }
@@ -38,10 +32,8 @@ export class ClientController {
   async getClients(
     @QueryParams() params: GetClientsParams
     ) {
-    const { offset, limit, filter } = params
+    const { filter } = params
     const data = await this.clientRepository.getAll(
-      parseInt(offset, 10),
-      parseInt(limit, 10),
       filter
     )
     return data

@@ -1,8 +1,8 @@
 import { Service } from 'typedi'
 import {
-  Get, Post, Body, JsonController, QueryParams, Authorized, Patch, Param
+  Get, Post, Body, JsonController, QueryParams, Authorized, Patch, Param, HttpCode, BadRequestError
 } from 'routing-controllers'
-import { IsUrl, IsString, IsBooleanString, IsBoolean, IsNumberString, IsPositive, IsIn } from 'class-validator'
+import { IsUrl, IsString, IsBooleanString, IsBoolean, IsNumberString, IsPositive, IsIn, IsOptional, IsISO8601 } from 'class-validator'
 
 import { PageRepository } from '../repository/PageRepository'
 import { MetricsRepository } from '../repository/MetricsRepository'
@@ -18,10 +18,13 @@ export class CreatePageParams {
   title: string
 
   @IsPositive()
-  clientID: string
+  clientID: number
 
   @IsIn(QUESTION_VARIANT_ARRAY)
   type: QUESTION_VARIANT_TYPE
+
+  @IsOptional()
+  parent: number
 }
 
 export class GetPageTitleParams {
@@ -60,6 +63,12 @@ export class GetPagesParams {
 }
 
 export class GetClientPagesParams {
+  @IsISO8601()
+  startDate: string
+
+  @IsISO8601()
+  endDate: string
+
   @IsNumberString()
   clientID: string
 }
@@ -78,12 +87,16 @@ export class PageController {
   async createPage(
     @Body() params: CreatePageParams
     ) {
-    const { url, clientID: client, type } = params
+    const { url, clientID: client, type, parent } = params
     let { title } = params
+    if (type === 'related' && typeof parent !== 'number') {
+      // TODO: check parent exist && add to obj if related only
+      throw new BadRequestError('INVALID_PARENT')
+    }
     if (title.length === 0) {
       title = await getTitle(url)
     }
-    const data = await this.pageRepository.create({ url, title, client, type })
+    const data = await this.pageRepository.create({ url, title, client, type, parent })
     const { _id: pageID } = data
     const metricsData = await this.metricsRepository.getYMetrics(url)
     if (Object.keys(metricsData.data).length > 0) {
@@ -156,13 +169,25 @@ export class PageController {
   async getClientPages(
     @QueryParams() params: GetClientPagesParams
     ) {
-    const { clientID } = params
-    const data = await this.pageRepository.getByClient(
+    const { clientID, startDate, endDate } = params
+    const pageData = await this.pageRepository.getByClient(
       parseInt(clientID, 10)
     )
-    return data
+    const pages = await this.pageRepository.getClientPagesID(
+      parseInt(clientID, 10)
+    )
+    const metricsData = await this.metricsRepository.getTotal(startDate, endDate, pages)
+    const metricsMap: any = {}
+    for (let i = 0; i < metricsData.length; i++) {
+      metricsMap[metricsData[i]._id] = metricsData[i].value
+    }
+    for (let i = 0; i < pageData.length; i++) {
+      pageData[i].views = metricsMap[pageData[i]._id] || 0
+    }
+    return pageData
   }
 
+  @HttpCode(204)
   @Patch('/v1/page/:pageID/status')
   async updateStatus(
     @Param('pageID') pageID: number,
@@ -170,6 +195,7 @@ export class PageController {
     ) {
     const { active } = params
     await this.pageRepository.updateStatus(pageID, active)
-    return 'ok'
+    // TODO: issue
+    return ''
   }
 }

@@ -7,14 +7,12 @@ export class ClientRepository {
     return Client.create(params)
   }
 
-  getAll(offset: number, limit: number, filter: string) {
+  getAll(filter: string) {
     const query = filter
     ? { $text: { $search: filter } }
     : {}
     return Client
       .find(query, '_id name')
-      .skip(offset)
-      .limit(limit)
       .lean()
       .exec()
   }

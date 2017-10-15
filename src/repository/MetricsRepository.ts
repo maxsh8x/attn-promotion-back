@@ -158,7 +158,30 @@ export class MetricsRepository {
       byField: 'pageviews',
       matchType: 'ad'
     })
+    return Metrics
+      .aggregate(pipeline)
+      .exec()
+  }
 
+  getTotal(startDate: string, endDate: string, pages: number[]) {
+    const pipeline = [
+      {
+        $match: {
+          page: { $in: pages },
+          date: {
+            $gte: new Date(startDate),
+            $lte: new Date(endDate)
+          },
+          type: 'ad'
+        }
+      },
+      {
+        $group: {
+          _id: '$page',
+          value: { $sum: '$pageviews' }
+        }
+      }
+    ]
     return Metrics
       .aggregate(pipeline)
       .exec()

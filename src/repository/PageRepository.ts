@@ -26,9 +26,13 @@ export class PageRepository {
 
   getByClient(client: number): any {
     return Page
-      .find({ client }, '_id active url title type')
+      .find({ client }, '_id active url title type parent')
       .lean()
       .exec()
+  }
+
+  getClientPagesID(client: number): any {
+    return Page.distinct('_id', { client })
   }
 
   getAll(params: IGetAllParams): any {

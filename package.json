@@ -42,7 +42,7 @@
     "mongoose-lean-id": "^0.1.0",
     "mongoose-sequence": "^4.0.0",
     "reflect-metadata": "^0.1.10",
-    "routing-controllers": "^0.7.4",
+    "routing-controllers": "^0.7.6",
     "typedi": "^0.5.2"
   }
 }

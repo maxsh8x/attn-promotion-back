@@ -82,6 +82,8 @@ export class MetricsController {
         pageID
       }])
     }
+    // TODO: issue
+    return ''
   }
 
   @Authorized(['root'])
