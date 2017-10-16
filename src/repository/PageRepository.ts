@@ -59,7 +59,7 @@ export class PageRepository {
 
   getActivePagesURL(): any {
     return Page
-      .find({ active: true }, '_id url')
+      .find({ active: true }, '_id client url')
       .lean()
       .exec()
   }

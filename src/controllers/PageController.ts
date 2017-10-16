@@ -7,6 +7,7 @@ import { IsUrl, IsString, IsBooleanString, IsBoolean, IsNumberString, IsPositive
 import { PageRepository } from '../repository/PageRepository'
 import { MetricsRepository } from '../repository/MetricsRepository'
 import { InputRepository } from '../repository/InputRepository'
+import { ClientRepository } from '../repository/ClientRepository'
 import { getTitle } from '../utils/page'
 import { metricNetworks, QUESTION_VARIANT_TYPE, QUESTION_VARIANT_ARRAY } from '../constants'
 
@@ -79,7 +80,8 @@ export class PageController {
   constructor(
     private pageRepository: PageRepository,
     private metricsRepository: MetricsRepository,
-    private inputRepository: InputRepository
+    private inputRepository: InputRepository,
+    private clientRepository: ClientRepository
   ) { }
 
   @Authorized(['root'])
@@ -98,7 +100,9 @@ export class PageController {
     }
     const data = await this.pageRepository.create({ url, title, client, type, parent })
     const { _id: pageID } = data
-    const metricsData = await this.metricsRepository.getYMetrics(url)
+    // CounterID to cache
+    const { counterID } = await this.clientRepository.getOne(client)
+    const metricsData = await this.metricsRepository.getYMetrics(url, counterID)
     if (Object.keys(metricsData.data).length > 0) {
       try {
         await this.metricsRepository.createMetrics([{

@@ -4,7 +4,6 @@
   "agendaMongoDB": "mongodb://localhost/agenda",
   "redis": "redis://127.0.0.1:6380/4",
   "secret": "RANDOM_STRING",
-  "counterID": 991919191,
   "tokenOAuth": "Da23rdDSkSxczX",
   "apiURL": "https://api-metrika.yandex.ru/stat/v1/data"
 }

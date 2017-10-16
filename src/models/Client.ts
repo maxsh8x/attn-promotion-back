@@ -10,7 +10,8 @@ interface IData extends mongoose.Document {
 const Data = new mongoose.Schema(
   {
     _id: Number,
-    name: { type: String, required: true, unique: true }
+    name: { type: String, required: true, unique: true },
+    counterID: { type: Number, required: true, unique: true}
   },
   {
     _id: false,

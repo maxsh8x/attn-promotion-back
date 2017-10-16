@@ -1,22 +1,33 @@
 import { Container, Service } from 'typedi'
 import { PageRepository } from '../repository/PageRepository'
 import { MetricsRepository } from '../repository/MetricsRepository'
+import { ClientRepository } from '../repository/ClientRepository'
 
 @Service()
 class Task {
   constructor(
     private pageRepository: PageRepository,
-    private metricsRepository: MetricsRepository
-  ) {}
+    private metricsRepository: MetricsRepository,
+    private clientRepository: ClientRepository
+  ) { }
 
   async updateAllMetrics(job: any, done: any): Promise<void> {
-    const urls = await this.pageRepository.getActivePagesURL()
+    const activePages = await this.pageRepository.getActivePagesURL()
+    const clientIDs = activePages.map((page: any) => page.client)
+    const clients = await this.clientRepository.getTokens(clientIDs)
+    const countersMap: any = {}
+    for (let i = 0; i < clients.length; i += 1) {
+      countersMap[clients[i]._id] = clients[i].counterID
+    }
     const items = []
-    for (let i = 0; i < urls.length; i++) {
-      const metricsData = await this.metricsRepository.getYMetrics(urls[i].url)
+    for (let i = 0; i < activePages.length; i++) {
+      const metricsData = await this.metricsRepository.getYMetrics(
+        activePages[i].url,
+        countersMap[activePages[i].client]
+      )
       items.push({
         ...metricsData,
-        pageID: urls[i]._id
+        pageID: activePages[i]._id
       })
     }
     try {

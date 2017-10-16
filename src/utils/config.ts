@@ -17,9 +17,6 @@ class Config {
   @IsString()
   secret: string
 
-  @IsInt()
-  counterID: number
-
   @IsString()
   tokenOAuth: string
 

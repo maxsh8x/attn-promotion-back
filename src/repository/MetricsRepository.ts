@@ -23,8 +23,9 @@ interface IGetCostChartParams {
 
 @Service()
 export class MetricsRepository {
-  async getYMetrics(url: string, yDate = 'yesterday') {
+  async getYMetrics(url: string, counterID: number, yDate = 'yesterday') {
     const basicParams = {
+      ids: counterID,
       date1: yDate,
       date2: yDate,
       filters: `ym:s:startURL=='${url}'`,
@@ -70,7 +71,6 @@ export class MetricsRepository {
   }
 
   createMetrics(items: any[]): any {
-    // const bulk = Metrics.collection.initializeUnorderedBulkOp()
     const docs = []
     for (let i = 0; i < items.length; i++) {
       const keys = Object.keys(items[i].data)

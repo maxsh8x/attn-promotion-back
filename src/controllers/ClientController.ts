@@ -2,7 +2,7 @@ import { Service } from 'typedi'
 import {
   Get, Post, Body, JsonController, QueryParams, Authorized, HttpCode
 } from 'routing-controllers'
-import { IsString } from 'class-validator'
+import { IsString, IsPositive } from 'class-validator'
 import { ClientRepository } from '../repository/ClientRepository'
 
 export class GetClientsParams {
@@ -18,6 +18,9 @@ export class SearchClientsParams {
 export class CreateClientParams {
   @IsString()
   name: string
+
+  @IsPositive()
+  counterID: string
 }
 
 @Service()
@@ -55,9 +58,10 @@ export class ClientController {
   async createClient(
     @Body() params: CreateClientParams
     ) {
-    const { name } = params
+    const { name, counterID } = params
     await this.clientRepository.create({
-      name
+      name,
+      counterID
     })
     // TODO: issue
     return ''

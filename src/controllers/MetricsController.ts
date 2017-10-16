@@ -7,6 +7,7 @@ import { IsPositive, IsString, IsUrl, IsISO8601, IsNumberString } from 'class-va
 import { MetricsRepository } from '../repository/MetricsRepository'
 import { PageRepository } from '../repository/PageRepository'
 import { InputRepository } from '../repository/InputRepository'
+import { ClientRepository } from '../repository/ClientRepository'
 import { byMetric, convertToDate } from '../utils/metrics'
 import { CHART_INTERVAL_TYPE } from '../constants'
 
@@ -60,7 +61,8 @@ export class MetricsController {
   constructor(
     private metricsRepository: MetricsRepository,
     private pageRepository: PageRepository,
-    private inputRepository: InputRepository
+    private inputRepository: InputRepository,
+    private clientRepository: ClientRepository,
   ) { }
 
   @HttpCode(204)
@@ -74,8 +76,9 @@ export class MetricsController {
     if (pageData === null) {
       throw new NotFoundError('PageID not found')
     }
-    const { url } = pageData
-    const data = await this.metricsRepository.getYMetrics(url, yDate)
+    const { url, client } = pageData
+    const { counterID } = await this.clientRepository.getOne(client)
+    const data = await this.metricsRepository.getYMetrics(url, counterID, yDate)
     if (Object.keys(data.data).length > 0) {
       await this.metricsRepository.createMetrics([{
         ...data,

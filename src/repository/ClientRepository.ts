@@ -7,12 +7,28 @@ export class ClientRepository {
     return Client.create(params)
   }
 
+  getTokens(clientID: number[]): any {
+    return Client
+      .find({
+        _id: { $in: clientID }
+      }, '_id counterID')
+      .lean()
+      .exec()
+  }
+
+  getOne(clientID: number): any {
+    return Client
+      .findById(clientID)
+      .lean()
+      .exec()
+  }
+
   getAll(filter: string) {
     const query = filter
-    ? { $text: { $search: filter } }
-    : {}
+      ? { $text: { $search: filter } }
+      : {}
     return Client
-      .find(query, '_id name')
+      .find(query, '_id name counterID')
       .lean()
       .exec()
   }

@@ -6,7 +6,6 @@ const config = getAppConfig()
 const getInstance = () => axios.create({
   baseURL: config.apiURL,
   params: {
-    ids: config.counterID,
     oauth_token: config.tokenOAuth,
     pretty: false
   }
