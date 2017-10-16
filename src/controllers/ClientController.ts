@@ -1,8 +1,17 @@
 import { Service } from 'typedi'
 import {
-  Get, Post, Body, JsonController, QueryParams, Authorized, HttpCode
+  Get,
+  Post,
+  Body,
+  JsonController,
+  QueryParams,
+  Authorized,
+  HttpCode
 } from 'routing-controllers'
-import { IsString, IsPositive } from 'class-validator'
+import {
+  IsString,
+  IsPositive
+} from 'class-validator'
 import { ClientRepository } from '../repository/ClientRepository'
 
 export class GetClientsParams {

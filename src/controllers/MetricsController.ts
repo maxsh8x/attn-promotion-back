@@ -1,15 +1,29 @@
 import { Service } from 'typedi'
 import {
-  Get, Post, Body, JsonController, Authorized, NotFoundError, HttpCode, QueryParams
+  Get,
+  Post,
+  Body,
+  JsonController,
+  Authorized,
+  NotFoundError,
+  HttpCode,
+  QueryParams
 } from 'routing-controllers'
-import { IsPositive, IsString, IsUrl, IsISO8601, IsNumberString } from 'class-validator'
+import {
+  IsPositive,
+  IsString,
+  IsUrl,
+  IsISO8601,
+  IsNumberString,
+  IsIn
+} from 'class-validator'
 
 import { MetricsRepository } from '../repository/MetricsRepository'
 import { PageRepository } from '../repository/PageRepository'
 import { InputRepository } from '../repository/InputRepository'
 import { ClientRepository } from '../repository/ClientRepository'
 import { byMetric, convertToDate } from '../utils/metrics'
-import { CHART_INTERVAL_TYPE } from '../constants'
+import { CHART_INTERVAL_TYPE, CHART_INTERVAL_ARRAY } from '../constants'
 
 export class UpdateMetricsParams {
   @IsPositive()
@@ -50,8 +64,7 @@ export class PromotionChartParams {
   @IsNumberString()
   pageID: string
 
-  // TODO: enum
-  @IsString()
+  @IsIn(CHART_INTERVAL_ARRAY)
   interval: CHART_INTERVAL_TYPE
 }
 

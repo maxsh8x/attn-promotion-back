@@ -1,8 +1,17 @@
 import { Service } from 'typedi'
 import {
-  Post, Body, JsonController, Authorized, HttpCode
+  Post,
+  Body,
+  JsonController,
+  Authorized,
+  HttpCode
 } from 'routing-controllers'
-import { IsPositive, IsString, IsInt, IsISO8601 } from 'class-validator'
+import {
+  IsPositive,
+  IsString,
+  IsInt,
+  IsISO8601
+} from 'class-validator'
 import { InputRepository } from '../repository/InputRepository'
 
 export class UpdateInputParams {
@@ -23,7 +32,6 @@ export class UpdateInputParams {
 }
 
 export class GetInputParams {
-  // TODO: check is date
   @IsISO8601()
   yDate: string
 

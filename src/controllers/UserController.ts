@@ -1,7 +1,12 @@
 import { Service } from 'typedi'
 import {
-  Post, JsonController, Body, Authorized, NotFoundError,
-  BadRequestError, HttpCode
+  Post,
+  JsonController,
+  Body,
+  Authorized,
+  NotFoundError,
+  BadRequestError,
+  HttpCode
 } from 'routing-controllers'
 import { UserRepository } from '../repository/UserRepository'
 import { TokenRepository } from '../repository/TokenRepository'
