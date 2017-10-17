@@ -102,7 +102,7 @@ export class MetricsController {
     return ''
   }
 
-  @Authorized(['root'])
+  @Authorized(['root', 'buchhalter'])
   @Get('/v1/metrics')
   async getMetrics(
     @QueryParams() params: GetMetricsParams
@@ -113,7 +113,7 @@ export class MetricsController {
     return result
   }
 
-  @Authorized(['root'])
+  @Authorized(['root', 'buchhalter'])
   @Post('/v1/metrics/linechart')
   async lineChart(
     @Body() params: LineChartParams
@@ -124,7 +124,7 @@ export class MetricsController {
     return { data }
   }
 
-  @Authorized(['root'])
+  @Authorized(['root', 'buchhalter'])
   @Get('/v1/metrics/promotionChart')
   async promotionChart(
     @QueryParams() params: PromotionChartParams

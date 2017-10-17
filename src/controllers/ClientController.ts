@@ -10,7 +10,8 @@ import {
 } from 'routing-controllers'
 import {
   IsString,
-  IsPositive
+  IsPositive,
+  Length
 } from 'class-validator'
 import { ClientRepository } from '../repository/ClientRepository'
 
@@ -28,6 +29,13 @@ export class CreateClientParams {
   @IsString()
   name: string
 
+  @IsString()
+  brand: string
+
+  @Length(10, 10)
+  @IsPositive()
+  vatin: number
+
   @IsPositive()
   counterID: string
 }
@@ -39,7 +47,7 @@ export class ClientController {
     private clientRepository: ClientRepository
   ) { }
 
-  @Authorized(['root'])
+  @Authorized(['root', 'buchhalter'])
   @Get('/v1/client/')
   async getClients(
     @QueryParams() params: GetClientsParams
@@ -51,7 +59,7 @@ export class ClientController {
     return data
   }
 
-  @Authorized(['root'])
+  @Authorized(['root', 'buchhalter'])
   @Get('/v1/client/search')
   async searchClients(
     @QueryParams() params: SearchClientsParams
@@ -67,9 +75,11 @@ export class ClientController {
   async createClient(
     @Body() params: CreateClientParams
     ) {
-    const { name, counterID } = params
+    const { name, brand, vatin, counterID } = params
     await this.clientRepository.create({
       name,
+      brand,
+      vatin,
       counterID
     })
     // TODO: issue

@@ -33,8 +33,9 @@ Use https://github.com/agenda/agendash
 ## Permissions
 
 Each token (Authentication header) has one of following permission type:
-### Root (root)
-- Full access to system
-
-### Offer (ofr)
-- View metrics
+### Root
+- Read and write all questions.
+### Buchhalter
+- Only read all questions.
+### Manager
+- Only read own questions.

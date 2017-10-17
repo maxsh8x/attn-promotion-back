@@ -1,5 +1,5 @@
-export const ROLES_ARRAY = ['root', 'ofr']
-export type ROLES_TYPE = 'root' | 'ofr'
+export const ROLES_ARRAY = ['root', 'buchhalter', 'manager']
+export type ROLES_TYPE = 'root' | 'buchhalter' | 'manager'
 
 export const metricNetworks = ['google', 'fb', 'yandex', 'vk', 'ok']
 export const syntheticNetworks = ['ad', 'social', 'referral', 'internal', 'direct']

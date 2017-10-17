@@ -135,6 +135,7 @@ export class PageController {
     return { pageID }
   }
 
+  @Authorized(['root', 'buchhalter'])
   @Get('/v1/page/title')
   async getTitle(
     @QueryParams() params: GetPageTitleParams
@@ -143,7 +144,7 @@ export class PageController {
     return { title }
   }
 
-  @Authorized(['root'])
+  @Authorized(['root', 'buchhalter'])
   @Get('/v1/page/count')
   async count(
     @QueryParams() params: CountParams
@@ -154,7 +155,7 @@ export class PageController {
     return count
   }
 
-  @Authorized(['root'])
+  @Authorized(['root', 'buchhalter'])
   @Get('/v1/page/')
   async getPages(
     @QueryParams() params: GetPagesParams
@@ -187,7 +188,7 @@ export class PageController {
     }
   }
 
-  @Authorized(['root'])
+  @Authorized(['root', 'buchhalter'])
   @Get('/v1/page/client')
   async getClientPages(
     @QueryParams() params: GetClientPagesParams
