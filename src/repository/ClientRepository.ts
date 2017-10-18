@@ -28,7 +28,7 @@ export class ClientRepository {
       ? { $text: { $search: filter } }
       : {}
     return Client
-      .find(query, '_id name counterID')
+      .find(query, '_id name counterID brand vatin')
       .lean()
       .exec()
   }

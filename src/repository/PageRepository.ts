@@ -68,6 +68,15 @@ export class PageRepository {
     return Page.distinct('_id', { url: { $in: urls } })
   }
 
+  getGroupQuestions(): any {
+    return Page
+      .find({
+        type: 'group'
+      })
+      .lean()
+      .exec()
+  }
+
   updateStatus(pageID: number, active: boolean): any {
     return Page.findByIdAndUpdate(pageID, { active })
   }

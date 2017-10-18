@@ -20,7 +20,8 @@ import {
   IsPositive,
   IsIn,
   IsOptional,
-  IsISO8601
+  IsISO8601,
+  ArrayNotEmpty
 } from 'class-validator'
 
 import { PageRepository } from '../repository/PageRepository'
@@ -37,8 +38,11 @@ export class CreatePageParams {
   @IsString()
   title: string
 
-  @IsPositive()
-  clientID: number
+  @ArrayNotEmpty()
+  @IsPositive({
+    each: true
+  })
+  clients: number[]
 
   @IsIn(QUESTION_VARIANT_ARRAY)
   type: QUESTION_VARIANT_TYPE
@@ -108,7 +112,7 @@ export class PageController {
   async createPage(
     @Body() params: CreatePageParams
     ) {
-    const { url, clientID: client, type, parent } = params
+    const { url, clients, type, parent } = params
     let { title } = params
     if (type === 'related' && typeof parent !== 'number') {
       // TODO: check parent exist && add to obj if related only
@@ -117,9 +121,9 @@ export class PageController {
     if (title.length === 0) {
       title = await getTitle(url)
     }
-    const data = await this.pageRepository.create({ url, title, client, type, parent })
+    const data = await this.pageRepository.create({ url, title, clients, type, parent })
     const { _id: pageID } = data
-    // CounterID to cache
+    // CounterID to cache. Group/Individual
     const { counterID } = await this.clientRepository.getOne(client)
     const metricsData = await this.metricsRepository.getYMetrics(url, counterID)
     if (Object.keys(metricsData.data).length > 0) {
@@ -209,6 +213,13 @@ export class PageController {
       pageData[i].views = metricsMap[pageData[i]._id] || 0
     }
     return pageData
+  }
+
+  @Authorized(['root'])
+  @Get('/v1/page/group-questions')
+  async groupQuestions(
+    ) {
+    return await this.pageRepository.getGroupQuestions()
   }
 
   @HttpCode(204)
