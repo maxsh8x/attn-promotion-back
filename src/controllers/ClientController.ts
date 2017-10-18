@@ -10,8 +10,10 @@ import {
 } from 'routing-controllers'
 import {
   IsString,
-  IsPositive,
-  Length
+  IsNumberString,
+  Length,
+  Min,
+  Max
 } from 'class-validator'
 import { ClientRepository } from '../repository/ClientRepository'
 
@@ -32,11 +34,12 @@ export class CreateClientParams {
   @IsString()
   brand: string
 
-  @Length(10, 10)
-  @IsPositive()
-  vatin: number
+  @Length(12, 12)
+  @IsNumberString()
+  vatin: string
 
-  @IsPositive()
+  @Min(10000000)
+  @Max(99999999)
   counterID: string
 }
 
