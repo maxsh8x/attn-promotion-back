@@ -40,7 +40,7 @@ export class CreateClientParams {
 
   @Min(10000000)
   @Max(99999999)
-  counterID: string
+  counterID: number
 }
 
 @Service()

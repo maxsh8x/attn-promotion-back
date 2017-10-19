@@ -8,8 +8,7 @@ import {
   Authorized,
   Patch,
   Param,
-  HttpCode,
-  BadRequestError
+  HttpCode
 } from 'routing-controllers'
 import {
   IsUrl,
@@ -19,9 +18,11 @@ import {
   IsNumberString,
   IsPositive,
   IsIn,
-  IsOptional,
+  Min,
+  Max,
   IsISO8601,
-  ArrayNotEmpty
+  ArrayNotEmpty,
+  ValidateIf
 } from 'class-validator'
 
 import { PageRepository } from '../repository/PageRepository'
@@ -47,8 +48,14 @@ export class CreatePageParams {
   @IsIn(QUESTION_VARIANT_ARRAY)
   type: QUESTION_VARIANT_TYPE
 
-  @IsOptional()
+  @ValidateIf(o => o.type === 'related')
+  @IsPositive()
   parent: number
+
+  @ValidateIf(o => o.type === 'group')
+  @Min(10000000)
+  @Max(99999999)
+  counterID: number
 }
 
 export class GetPageTitleParams {
@@ -114,17 +121,18 @@ export class PageController {
     ) {
     const { url, clients, type, parent } = params
     let { title } = params
-    if (type === 'related' && typeof parent !== 'number') {
-      // TODO: check parent exist && add to obj if related only
-      throw new BadRequestError('INVALID_PARENT')
-    }
     if (title.length === 0) {
       title = await getTitle(url)
     }
     const data = await this.pageRepository.create({ url, title, clients, type, parent })
     const { _id: pageID } = data
-    // CounterID to cache. Group/Individual
-    const { counterID } = await this.clientRepository.getOne(client)
+    let counterID: number | null = null
+    if (type === 'group') {
+      counterID = params.counterID
+    } else {
+      const clientData = await this.clientRepository.getOne(clients[0])
+      counterID = clientData.counterID
+    }
     const metricsData = await this.metricsRepository.getYMetrics(url, counterID)
     if (Object.keys(metricsData.data).length > 0) {
       try {
