@@ -9,6 +9,7 @@ module.exports = {
     {
       name      : 'answer-promotion-back',
       script    : 'build/index.js',
+      exec_interpreter: '~/.nvm/versions/node/v8.7.0/bin/node',
       env: {
         COMMON_VARIABLE: 'true'
       },
