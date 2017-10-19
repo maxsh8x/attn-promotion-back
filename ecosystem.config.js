@@ -25,7 +25,7 @@ module.exports = {
   deploy : {
     production : {
       user : 'deploy',
-      host : '192.168.1.8',
+      host : '192.168.1.250',
       ref  : 'origin/master',
       repo : 'git@gitlab.com:thesalt/answer-promotion-back.git',
       path : '/home/deploy/projects/answer-promotion-back',
@@ -33,7 +33,7 @@ module.exports = {
     },
     dev : {
       user : 'deploy',
-      host : '192.168.1.8',
+      host : '192.168.1.250',
       ref  : 'origin/master',
       repo : 'git@gitlab.com:thesalt/answer-promotion-back.git',
       path : '/home/deploy/projects/answer-promotion-back',
