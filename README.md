@@ -26,6 +26,9 @@ yarn run build // after any code changes
 yarn run start
 ```
 
+## Deploy
+```pm2 deploy ecosystem.config.js production```
+
 ## Monitoring
 ### Agenda
 Use https://github.com/agenda/agendash
