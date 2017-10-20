@@ -80,4 +80,15 @@ export class PageRepository {
   updateStatus(pageID: number, active: boolean): any {
     return Page.findByIdAndUpdate(pageID, { active })
   }
+
+  search(filter: string, limit: number): any {
+    const query = filter
+      ? { $text: { $search: filter } }
+      : {}
+    return Page
+      .find(query, '_id title')
+      .limit(limit)
+      .lean()
+      .exec()
+  }
 }

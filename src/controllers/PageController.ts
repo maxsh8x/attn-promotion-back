@@ -21,7 +21,6 @@ import {
   Min,
   Max,
   IsISO8601,
-  ArrayNotEmpty,
   ValidateIf
 } from 'class-validator'
 
@@ -36,14 +35,9 @@ export class CreatePageParams {
   @IsUrl()
   url: string
 
-  @IsString()
-  title: string
-
-  @ArrayNotEmpty()
-  @IsPositive({
-    each: true
-  })
-  clients: number[]
+  @ValidateIf(o => o.type === 'individual')
+  @IsPositive()
+  client: number
 
   @IsIn(QUESTION_VARIANT_ARRAY)
   type: QUESTION_VARIANT_TYPE
@@ -104,6 +98,11 @@ export class GetClientPagesParams {
   clientID: string
 }
 
+export class SearchPagesParams {
+  @IsString()
+  filter: string
+}
+
 @Service()
 @JsonController()
 export class PageController {
@@ -119,18 +118,15 @@ export class PageController {
   async createPage(
     @Body() params: CreatePageParams
     ) {
-    const { url, clients, type, parent } = params
-    let { title } = params
-    if (title.length === 0) {
-      title = await getTitle(url)
-    }
-    const data = await this.pageRepository.create({ url, title, clients, type, parent })
+    const { url, client, type, parent } = params
+    const title = await getTitle(url)
+    const data = await this.pageRepository.create({ url, title, type, parent })
     const { _id: pageID } = data
     let counterID: number | null = null
     if (type === 'group') {
       counterID = params.counterID
     } else {
-      const clientData = await this.clientRepository.getOne(clients[0])
+      const clientData = await this.clientRepository.getOne(client)
       counterID = clientData.counterID
     }
     const metricsData = await this.metricsRepository.getYMetrics(url, counterID)
@@ -240,5 +236,19 @@ export class PageController {
     await this.pageRepository.updateStatus(pageID, active)
     // TODO: issue
     return ''
+  }
+
+  @Authorized(['root', 'buchhalter'])
+  @Get('/v1/page/search')
+  async searchPages(
+    @QueryParams() params: SearchPagesParams
+    ) {
+    const { filter } = params
+    const data = await this.pageRepository.search(filter, 5)
+    const result = data.map((item: any) => ({
+      value: item._id,
+      text: item.title
+    }))
+    return result
   }
 }
