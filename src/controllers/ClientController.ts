@@ -13,7 +13,9 @@ import {
   IsNumberString,
   Length,
   Min,
-  Max
+  Max,
+  IsISO8601,
+  IsPositive
 } from 'class-validator'
 import { ClientRepository } from '../repository/ClientRepository'
 
@@ -41,6 +43,26 @@ export class CreateClientParams {
   @Min(10000000)
   @Max(99999999)
   counterID: number
+}
+
+export class BindClientParams {
+  @IsPositive()
+  page: number
+
+  @IsPositive()
+  client: number
+
+  @IsPositive()
+  minViews: number
+
+  @IsPositive()
+  maxViews: number
+
+  @IsISO8601()
+  startDate: string
+
+  @IsISO8601()
+  endDate: string
 }
 
 @Service()
@@ -84,6 +106,32 @@ export class ClientController {
       brand,
       vatin,
       counterID
+    })
+    // TODO: issue
+    return ''
+  }
+
+  @HttpCode(204)
+  @Authorized(['root'])
+  @Post('/v1/client/bind')
+  async bind(
+    @Body() params: BindClientParams
+    ) {
+    const {
+      page,
+      client,
+      minViews,
+      maxViews,
+      startDate,
+      endDate
+    } = params
+    await this.clientRepository.create({
+      page,
+      client,
+      minViews,
+      maxViews,
+      startDate,
+      endDate
     })
     // TODO: issue
     return ''
