@@ -9,7 +9,7 @@ import {
 import {
   IsPositive,
   IsString,
-  IsInt,
+  IsNumber,
   IsISO8601
 } from 'class-validator'
 import { InputRepository } from '../repository/InputRepository'
@@ -27,7 +27,7 @@ export class UpdateInputParams {
   @IsISO8601()
   yDate: string
 
-  @IsInt()
+  @IsNumber()
   value: number
 }
 
