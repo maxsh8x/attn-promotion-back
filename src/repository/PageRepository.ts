@@ -1,5 +1,6 @@
 import { Service } from 'typedi'
 import { Page } from '../models/Page'
+import { PageMeta } from '../models/PageMeta'
 
 interface IGetAllParams {
   limit: number,
@@ -7,6 +8,15 @@ interface IGetAllParams {
   active: boolean,
   filter: string,
   clients: number[]
+}
+
+interface IBindClientParams {
+  page: number
+  clients: number[]
+  minViews: number
+  maxViews: number
+  startDate: Date
+  endDate: Date
 }
 
 @Service()
@@ -90,5 +100,9 @@ export class PageRepository {
       .limit(limit)
       .lean()
       .exec()
+  }
+
+  bindClients(params: IBindClientParams): any {
+    // return PageMeta.create(params)
   }
 }

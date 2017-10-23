@@ -103,6 +103,28 @@ export class SearchPagesParams {
   filter: string
 }
 
+export class BindClientsParams {
+  @IsPositive()
+  page: number
+
+  @IsPositive({
+    each: true
+  })
+  clients: number[]
+
+  @IsPositive()
+  minViews: number
+
+  @IsPositive()
+  maxViews: number
+
+  @IsISO8601()
+  startDate: string
+
+  @IsISO8601()
+  endDate: string
+}
+
 @Service()
 @JsonController()
 export class PageController {
@@ -251,5 +273,24 @@ export class PageController {
       text: item.title
     }))
     return result
+  }
+
+  @HttpCode(204)
+  @Authorized(['root'])
+  @Post('/v1/page/bind')
+  async bindClients(
+    @Body() params: BindClientsParams
+    ) {
+    const { page, clients, minViews, maxViews, startDate, endDate } = params
+    await this.pageRepository.bindClients({
+      page,
+      clients,
+      minViews,
+      maxViews,
+      startDate: new Date(startDate),
+      endDate: new Date(endDate)
+    })
+    // TODO: issue
+    return ''
   }
 }
