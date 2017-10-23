@@ -169,6 +169,7 @@ export class PageController {
     @QueryParams() params: GetPagesParams
     ) {
     const { yDate, limit, offset, filter, active, clients: rawClients } = params
+    // TODO: class-validator
     const clients = rawClients
       .split(',')
       .filter(x => parseInt(x, 10))

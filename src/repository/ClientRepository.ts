@@ -33,7 +33,7 @@ export class ClientRepository {
       .exec()
   }
 
-  search(filter: string, limit: number) {
+  search(filter: string, limit: number): any {
     const query = filter
       ? { $text: { $search: filter } }
       : {}

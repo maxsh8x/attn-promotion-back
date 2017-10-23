@@ -91,7 +91,11 @@ export class ClientController {
     ) {
     const { filter } = params
     const data = await this.clientRepository.search(filter, 5)
-    return data
+    const result = data.map((item: any) => ({
+      value: item._id,
+      text: item.name
+    }))
+    return result
   }
 
   @HttpCode(204)
