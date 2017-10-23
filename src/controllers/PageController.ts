@@ -29,7 +29,7 @@ import { MetricsRepository } from '../repository/MetricsRepository'
 import { InputRepository } from '../repository/InputRepository'
 import { ClientRepository } from '../repository/ClientRepository'
 import { getTitle } from '../utils/page'
-import { metricNetworks, QUESTION_VARIANT_TYPE, QUESTION_VARIANT_ARRAY } from '../constants'
+import { sources, QUESTION_VARIANT_TYPE, QUESTION_VARIANT_ARRAY } from '../constants'
 
 export class CreatePageParams {
   @IsUrl()
@@ -190,7 +190,7 @@ export class PageController {
     return {
       pages,
       input,
-      metricNetworks,
+      sources,
       activePages,
       inactivePages
     }

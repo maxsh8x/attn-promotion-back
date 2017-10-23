@@ -1,7 +1,7 @@
 import { Service } from 'typedi'
 import { Metrics } from '../models/Metrics'
 import axios from '../utils/fetcher'
-import { metricSources } from '../constants'
+import { allSources } from '../constants'
 import { CHART_INTERVAL_TYPE } from '../constants'
 import { getCostPipeline } from '../utils/metrics'
 
@@ -51,7 +51,7 @@ export class MetricsRepository {
       dataSource.data.forEach((item: any) => {
         if (fieldName !== 'total') {
           const sourceName = item.dimensions[0][fieldName]
-          if (metricSources.indexOf(sourceName) !== -1) {
+          if (allSources.indexOf(sourceName) !== -1) {
             data[sourceName] = item.metrics
           }
         } else {
@@ -93,7 +93,7 @@ export class MetricsRepository {
   getMetrics(yDate: string, pageID: number): any {
     return Metrics
       .find(
-      { date: yDate, page: pageID, type: { $in: [...metricSources, 'total'] } },
+      { date: yDate, page: pageID, type: { $in: [...allSources, 'total'] } },
       'pageviews pageDepth avgVisitDurationSeconds bounceRate type'
       )
       .lean()

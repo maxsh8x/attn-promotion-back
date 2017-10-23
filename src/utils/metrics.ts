@@ -1,4 +1,4 @@
-import { metricFields, CHART_INTERVAL_TYPE } from '../constants'
+import { metricFields, sources, CHART_INTERVAL_TYPE } from '../constants'
 import * as moment from 'moment'
 
 moment.updateLocale('en', {
@@ -19,9 +19,13 @@ interface IGetCostPipelineParams {
 
 export const byMetric = (data: any[]) => {
   return metricFields.map((metric: any) => {
-    const item: any = { metric }
+    const item: any = { metric, sources: {}, metagroups: {} }
     for (let i = 0; i < data.length; i++) {
-      item[data[i]['type']] = data[i][metric]
+      if (sources.indexOf(data[i]['type']) !== -1) {
+        item['sources'][data[i]['type']] = data[i][metric]
+      } else {
+        item['metagroups'][data[i]['type']] = data[i][metric]
+      }
     }
     return item
   })
