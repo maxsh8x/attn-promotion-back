@@ -87,14 +87,30 @@ export class PageRepository {
       .exec()
   }
 
+  getPageClients(page: number): number[] {
+    const pipeline = [
+      { $match: { page } },
+      {
+        $group: {
+          _id: '$client'
+        }
+      }
+    ]
+    return PageMeta
+      .aggregate(pipeline)
+      .exec()
+      .then((data: any) => data.map((item: any) => item._id))
+  }
+
   updateStatus(pageID: number, active: boolean): any {
     return Page.findByIdAndUpdate(pageID, { active })
   }
 
   search(filter: string, limit: number): any {
-    const query = filter
-      ? { $text: { $search: filter } }
-      : {}
+    const query: any = {}
+    if (filter) {
+      query.$text = { $search: filter }
+    }
     return Page
       .find(query, '_id title')
       .limit(limit)
@@ -103,6 +119,22 @@ export class PageRepository {
   }
 
   bindClients(params: IBindClientParams): any {
-    // return PageMeta.create(params)
+    const {
+      page,
+      clients,
+      minViews,
+      maxViews,
+      startDate,
+      endDate
+    } = params
+    const docs = clients.map(client => ({
+      client,
+      page,
+      minViews,
+      maxViews,
+      startDate,
+      endDate
+    }))
+    return PageMeta.insertMany(docs, { ordered: false })
   }
 }

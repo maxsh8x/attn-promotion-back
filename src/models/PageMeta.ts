@@ -10,6 +10,7 @@ interface IData extends mongoose.Document {
   maxViews: number
   startDate: Date
   endDate: Date
+  archieved: boolean,
 }
 
 const Data = new mongoose.Schema(

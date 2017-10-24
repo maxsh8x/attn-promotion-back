@@ -24,9 +24,17 @@ export class ClientRepository {
   }
 
   getAll(filter: string) {
-    const query = filter
-      ? { $text: { $search: filter } }
-      : {}
+    const query: any = {}
+    if (filter) {
+      query.$text = { $search: filter }
+    }
+    return Client
+      .find(query, '_id name counterID brand vatin')
+      .lean()
+      .exec()
+  }
+  getAllByIDs(clients: number[]) {
+    const query = { _id: { $in: clients } }
     return Client
       .find(query, '_id name counterID brand vatin')
       .lean()

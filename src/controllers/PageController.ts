@@ -21,7 +21,8 @@ import {
   Min,
   Max,
   IsISO8601,
-  ValidateIf
+  ValidateIf,
+  ArrayUnique
 } from 'class-validator'
 
 import { PageRepository } from '../repository/PageRepository'
@@ -107,6 +108,7 @@ export class BindClientsParams {
   @IsPositive()
   page: number
 
+  @ArrayUnique()
   @IsPositive({
     each: true
   })

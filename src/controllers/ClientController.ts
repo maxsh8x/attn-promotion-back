@@ -18,10 +18,16 @@ import {
   IsPositive
 } from 'class-validator'
 import { ClientRepository } from '../repository/ClientRepository'
+import { PageRepository } from '../repository/PageRepository'
 
 export class GetClientsParams {
   @IsString()
   filter: string
+}
+
+export class GetPageClientsParams {
+  @IsNumberString()
+  pageID: string
 }
 
 export class SearchClientsParams {
@@ -69,7 +75,8 @@ export class BindClientParams {
 @JsonController()
 export class ClientController {
   constructor(
-    private clientRepository: ClientRepository
+    private clientRepository: ClientRepository,
+    private pageRepository: PageRepository
   ) { }
 
   @Authorized(['root', 'buchhalter'])
@@ -80,6 +87,21 @@ export class ClientController {
     const { filter } = params
     const data = await this.clientRepository.getAll(
       filter
+    )
+    return data
+  }
+
+  @Authorized(['root', 'buchhalter'])
+  @Get('/v1/client/page')
+  async getPageClients(
+    @QueryParams() params: GetPageClientsParams
+    ) {
+    const { pageID } = params
+    const clients = await this.pageRepository.getPageClients(
+      parseInt(pageID, 10)
+    )
+    const data = await this.clientRepository.getAllByIDs(
+      clients
     )
     return data
   }
