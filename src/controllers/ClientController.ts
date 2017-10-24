@@ -95,7 +95,14 @@ export class ClientController {
       filter
     )
     const clients = clientsData.map((client: any) => client._id)
-    
+    const viewsData = await this.pageRepository.getClientsPagesIDs(clients)
+    const viewsDataMap: any = {}
+    for (let i = 0; i < viewsData.length; i += 1) {
+      viewsDataMap[viewsData[i]._id] = viewsData[i].views
+    }
+    for (let i = 0; i < clientsData.length; i += 1) {
+      clientsData[i].views = viewsDataMap[clientsData[i]._id]
+    }
     return clientsData
   }
 

@@ -153,15 +153,17 @@ export class PageController {
     ) {
     const { url, client, type, parent } = params
     const title = await getTitle(url)
-    const data = await this.pageRepository.create({ url, title, type, parent })
-    const { _id: pageID } = data
+    const createParams: any = { url, title, type, parent }
     let counterID: number | null = null
     if (type === 'group') {
       counterID = params.counterID
+      createParams.counterID = counterID
     } else {
       const clientData = await this.clientRepository.getOne(client)
       counterID = clientData.counterID
     }
+    const data = await this.pageRepository.create(createParams)
+    const { _id: pageID } = data
     const metricsData = await this.metricsRepository.getYMetrics(url, counterID)
     if (Object.keys(metricsData.data).length > 0) {
       try {

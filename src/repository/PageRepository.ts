@@ -34,11 +34,38 @@ export class PageRepository {
       .exec()
   }
 
-  getTotalByClients(clients: number[]) {
+  getClientsPagesIDs(clients: number[]) {
     const pipeline = [
       {
         $match: {
           client: { $in: clients }
+        }
+      },
+      {
+        $group: {
+          _id: { client: '$client', page: '$page' }
+        }
+      },
+      {
+        $graphLookup: {
+          from: 'metrics',
+          startWith: '$_id.page',
+          connectFromField: 'page',
+          connectToField: 'page',
+          as: 'doc',
+          restrictSearchWithMatch: { type: 'ad' }
+        }
+      },
+      {
+        $project: {
+          _id: '$_id.client',
+          views: { $sum: '$doc.pageviews' }
+        }
+      },
+      {
+        $group: {
+          _id: '$_id',
+          views: { $sum: '$views' }
         }
       }
     ]
