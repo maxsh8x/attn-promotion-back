@@ -23,7 +23,7 @@ export class ClientRepository {
       .exec()
   }
 
-  getAll(filter: string) {
+  getAll(filter: string): any {
     const query: any = {}
     if (filter) {
       query.$text = { $search: filter }
@@ -33,6 +33,7 @@ export class ClientRepository {
       .lean()
       .exec()
   }
+
   getAllByIDs(clients: number[]) {
     const query = { _id: { $in: clients } }
     return Client

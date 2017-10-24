@@ -34,15 +34,91 @@ export class PageRepository {
       .exec()
   }
 
+  getTotalByClients(clients: number[]) {
+    const pipeline = [
+      {
+        $match: {
+          client: { $in: clients }
+        }
+      }
+    ]
+    return PageMeta
+      .aggregate(pipeline)
+      .exec()
+  }
+
   getByClient(client: number): any {
-    return Page
-      .find({ client }, '_id active url title type parent')
-      .lean()
+    const pipeline = [
+      {
+        $match: {
+          client
+        }
+      },
+      {
+        $lookup: {
+          from: 'pages',
+          localField: 'page',
+          foreignField: '_id',
+          as: 'page_doc'
+        }
+      },
+      {
+        $unwind: '$page_doc'
+      },
+      {
+        $project: {
+          _id: '$page_doc._id',
+          active: '$page_doc.active',
+          url: '$page_doc.url',
+          title: '$page_doc.title',
+          type: '$page_doc.type',
+          parent: '$page_doc.parent'
+        }
+      }
+    ]
+    return PageMeta
+      .aggregate(pipeline)
+      .exec()
+  }
+
+  getByPage(page: number): any {
+    const pipeline = [
+      {
+        $match: {
+          page
+        }
+      },
+      {
+        $lookup: {
+          from: 'clients',
+          localField: 'client',
+          foreignField: '_id',
+          as: 'client_doc'
+        }
+      },
+      {
+        $unwind: '$client_doc'
+      },
+      {
+        $project: {
+          _id: '$client_doc._id',
+          name: '$client_doc.name',
+          brand: '$client_doc.brand',
+          vatin: '$client_doc.vatin',
+          minViews: '$minViews',
+          maxViews: '$maxViews',
+          startDate: '$startDate',
+          endDate: '$endDate'
+        }
+      }
+    ]
+    return PageMeta
+      .aggregate(pipeline)
       .exec()
   }
 
   getClientPagesID(client: number): any {
-    return Page.distinct('_id', { client })
+    return PageMeta.distinct('page', { client })
   }
 
   getAll(params: IGetAllParams): any {
@@ -87,21 +163,6 @@ export class PageRepository {
       .exec()
   }
 
-  getPageClients(page: number): number[] {
-    const pipeline = [
-      { $match: { page } },
-      {
-        $group: {
-          _id: '$client'
-        }
-      }
-    ]
-    return PageMeta
-      .aggregate(pipeline)
-      .exec()
-      .then((data: any) => data.map((item: any) => item._id))
-  }
-
   updateStatus(pageID: number, active: boolean): any {
     return Page.findByIdAndUpdate(pageID, { active })
   }
@@ -135,6 +196,6 @@ export class PageRepository {
       startDate,
       endDate
     }))
-    return PageMeta.insertMany(docs, { ordered: false })
+    return PageMeta.create(docs)
   }
 }

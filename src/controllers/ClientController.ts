@@ -23,6 +23,12 @@ import { PageRepository } from '../repository/PageRepository'
 export class GetClientsParams {
   @IsString()
   filter: string
+
+  @IsISO8601()
+  startDate: string
+
+  @IsISO8601()
+  endDate: string
 }
 
 export class GetPageClientsParams {
@@ -85,10 +91,12 @@ export class ClientController {
     @QueryParams() params: GetClientsParams
     ) {
     const { filter } = params
-    const data = await this.clientRepository.getAll(
+    const clientsData = await this.clientRepository.getAll(
       filter
     )
-    return data
+    const clients = clientsData.map((client: any) => client._id)
+    
+    return clientsData
   }
 
   @Authorized(['root', 'buchhalter'])
@@ -97,13 +105,10 @@ export class ClientController {
     @QueryParams() params: GetPageClientsParams
     ) {
     const { pageID } = params
-    const clients = await this.pageRepository.getPageClients(
+    const meta = await this.pageRepository.getByPage(
       parseInt(pageID, 10)
     )
-    const data = await this.clientRepository.getAllByIDs(
-      clients
-    )
-    return data
+    return meta
   }
 
   @Authorized(['root', 'buchhalter'])

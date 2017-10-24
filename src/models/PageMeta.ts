@@ -16,8 +16,8 @@ interface IData extends mongoose.Document {
 const Data = new mongoose.Schema(
   {
     _id: Number,
-    client: { type: Number, required: true },
-    page: { type: Number, required: true },
+    client: { type: Number, ref: 'Client', required: true },
+    page: { type: Number, ref: 'Page', required: true },
     minViews: { type: Number, required: true },
     maxViews: { type: Number, required: true },
     startDate: { type: Date, required: true },
@@ -34,5 +34,10 @@ const Data = new mongoose.Schema(
 Data.plugin(AutoIncrement, {
   id: 'pagemeta_seq'
 })
+
+Data.index(
+  { 'client': 1, 'page': 1 },
+  { unique: true }
+)
 
 export const PageMeta = mongoose.model<IData & mongoose.Document>('PageMeta', Data)

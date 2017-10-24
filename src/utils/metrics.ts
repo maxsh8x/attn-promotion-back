@@ -16,6 +16,13 @@ interface IGetCostPipelineParams {
   byField: string,
   matchType: string,
 }
+export const totalByPage = (data: any) => {
+  const metricsMap: any = {}
+  for (let i = 0; i < data.length; i++) {
+    metricsMap[data[i]._id] = data[i].value
+  }
+  return metricsMap
+}
 
 export const byMetric = (data: any[]) => {
   return metricFields.map((metric: any) => {

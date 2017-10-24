@@ -163,7 +163,7 @@ export class MetricsRepository {
       .exec()
   }
 
-  getTotal(startDate: string, endDate: string, pages: number[]) {
+  getTotalByPage(startDate: string, endDate: string, pages: number[]) {
     const pipeline = [
       {
         $match: {

@@ -30,6 +30,7 @@ import { MetricsRepository } from '../repository/MetricsRepository'
 import { InputRepository } from '../repository/InputRepository'
 import { ClientRepository } from '../repository/ClientRepository'
 import { getTitle } from '../utils/page'
+import { totalByPage } from '../utils/metrics'
 import { sources, QUESTION_VARIANT_TYPE, QUESTION_VARIANT_ARRAY } from '../constants'
 
 export class CreatePageParams {
@@ -97,6 +98,14 @@ export class GetClientPagesParams {
 
   @IsNumberString()
   clientID: string
+}
+
+export class GetGroupQuestionParams {
+  @IsISO8601()
+  startDate: string
+
+  @IsISO8601()
+  endDate: string
 }
 
 export class SearchPagesParams {
@@ -233,11 +242,8 @@ export class PageController {
     const pages = await this.pageRepository.getClientPagesID(
       parseInt(clientID, 10)
     )
-    const metricsData = await this.metricsRepository.getTotal(startDate, endDate, pages)
-    const metricsMap: any = {}
-    for (let i = 0; i < metricsData.length; i++) {
-      metricsMap[metricsData[i]._id] = metricsData[i].value
-    }
+    const metricsData = await this.metricsRepository.getTotalByPage(startDate, endDate, pages)
+    const metricsMap = totalByPage(metricsData)
     for (let i = 0; i < pageData.length; i++) {
       pageData[i].views = metricsMap[pageData[i]._id] || 0
     }
@@ -247,8 +253,17 @@ export class PageController {
   @Authorized(['root'])
   @Get('/v1/page/group-questions')
   async groupQuestions(
+    @QueryParams() params: GetGroupQuestionParams
     ) {
-    return await this.pageRepository.getGroupQuestions()
+    const { startDate, endDate } = params
+    const pageData = await this.pageRepository.getGroupQuestions()
+    const pages = pageData.map((item: any) => item._id)
+    const metricsData = await this.metricsRepository.getTotalByPage(startDate, endDate, pages)
+    const metricsMap = totalByPage(metricsData)
+    for (let i = 0; i < pageData.length; i++) {
+      pageData[i].views = metricsMap[pageData[i]._id] || 0
+    }
+    return pageData
   }
 
   @HttpCode(204)
