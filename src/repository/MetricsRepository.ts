@@ -39,7 +39,7 @@ export class MetricsRepository {
       ...basicParams,
       dimensions: 'ym:s:<attribution>TrafficSource'
     }
-
+    // TODO: 404 if counterID not found
     const { data: networksData } = await axios().get('', { params: networks })
     const { data: metaData } = await axios().get('', { params: meta })
     const { data: total } = await axios().get('', { params: basicParams })

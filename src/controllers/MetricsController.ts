@@ -142,7 +142,6 @@ export class MetricsController {
     }
     const metrics = await this.metricsRepository.getCostChart(chartParams)
     const inputs = await this.inputRepository.getCostChart(chartParams)
-
     const arrToMap = (arr: any[]) => {
       const result: { [s: string]: any } = {}
       for (let i = 0; i < arr.length; i++) {
