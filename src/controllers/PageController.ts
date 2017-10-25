@@ -19,7 +19,6 @@ import {
   IsPositive,
   IsIn,
   Min,
-  Max,
   IsISO8601,
   ValidateIf,
   ArrayUnique
@@ -31,27 +30,43 @@ import { InputRepository } from '../repository/InputRepository'
 import { ClientRepository } from '../repository/ClientRepository'
 import { getTitle } from '../utils/page'
 import { totalByPage } from '../utils/metrics'
-import { sources, QUESTION_VARIANT_TYPE, QUESTION_VARIANT_ARRAY } from '../constants'
+import { sources } from '../constants'
 
-export class CreatePageParams {
+export class CreateGroupPageParams {
   @IsUrl()
   url: string
 
-  @ValidateIf(o => o.type === 'individual')
+  @Min(10000000)
+  counterID: number
+}
+
+export class BasicCreatorParams {
+  @IsPositive()
+  minViews: number
+
+  @IsPositive()
+  maxViews: number
+
+  @IsISO8601()
+  startDate: string
+
+  @IsISO8601()
+  endDate: string
+}
+
+export class CreatePageParams extends BasicCreatorParams {
+  @IsUrl()
+  url: string
+
   @IsPositive()
   client: number
 
-  @IsIn(QUESTION_VARIANT_ARRAY)
-  type: QUESTION_VARIANT_TYPE
+  @IsIn(['individual', 'related'])
+  type: 'individual' | 'related'
 
   @ValidateIf(o => o.type === 'related')
   @IsPositive()
   parent: number
-
-  @ValidateIf(o => o.type === 'group')
-  @Min(10000000)
-  @Max(99999999)
-  counterID: number
 }
 
 export class GetPageTitleParams {
@@ -113,7 +128,7 @@ export class SearchPagesParams {
   filter: string
 }
 
-export class BindClientsParams {
+export class BindClientsParams extends BasicCreatorParams {
   @IsPositive()
   page: number
 
@@ -122,18 +137,6 @@ export class BindClientsParams {
     each: true
   })
   clients: number[]
-
-  @IsPositive()
-  minViews: number
-
-  @IsPositive()
-  maxViews: number
-
-  @IsISO8601()
-  startDate: string
-
-  @IsISO8601()
-  endDate: string
 }
 
 @Service()
@@ -147,23 +150,67 @@ export class PageController {
   ) { }
 
   @Authorized(['root'])
+  @Post('/v1/page/group')
+  async createGroupPage(
+    @Body() params: CreateGroupPageParams
+    ) {
+    const { url, counterID } = params
+    const title = await getTitle(url)
+    const data = await this.pageRepository.create(
+      {
+        url,
+        title,
+        counterID,
+        type: 'group'
+      }
+    )
+    const { _id: pageID } = data
+    const metricsData = await this.metricsRepository.getYMetrics(url, counterID)
+    if (Object.keys(metricsData.data).length > 0) {
+      try {
+        await this.metricsRepository.createMetrics([{
+          ...metricsData,
+          pageID
+        }])
+      } catch (e) {
+        // TODO: sentry
+      }
+    }
+    return { pageID }
+  }
+
+  @Authorized(['root'])
   @Post('/v1/page')
   async createPage(
     @Body() params: CreatePageParams
     ) {
-    const { url, client, type, parent } = params
+    const {
+      url,
+      client,
+      type,
+      parent,
+      minViews,
+      maxViews,
+      startDate,
+      endDate
+    } = params
     const title = await getTitle(url)
-    const createParams: any = { url, title, type, parent }
-    let counterID: number | null = null
-    if (type === 'group') {
-      counterID = params.counterID
-      createParams.counterID = counterID
-    } else {
-      const clientData = await this.clientRepository.getOne(client)
-      counterID = clientData.counterID
+    const createParams: any = { url, title, type }
+    if (type === 'related') {
+      createParams.parent = parent
     }
-    const data = await this.pageRepository.create(createParams)
-    const { _id: pageID } = data
+    const clientData = await this.clientRepository.getOne(client)
+    const counterID = clientData.counterID
+    const pageData = await this.pageRepository.create(createParams)
+    const { _id: pageID } = pageData
+    await this.pageRepository.bindClients({
+      page: pageID,
+      clients: [client],
+      minViews,
+      maxViews,
+      startDate: new Date(startDate),
+      endDate: new Date(endDate)
+    })
     const metricsData = await this.metricsRepository.getYMetrics(url, counterID)
     if (Object.keys(metricsData.data).length > 0) {
       try {
@@ -244,7 +291,11 @@ export class PageController {
     const pages = await this.pageRepository.getClientPagesID(
       parseInt(clientID, 10)
     )
-    const metricsData = await this.metricsRepository.getTotalByPage(startDate, endDate, pages)
+    const metricsData = await this.metricsRepository.getTotalByPage(
+      new Date(startDate),
+      new Date(endDate),
+      pages
+    )
     const metricsMap = totalByPage(metricsData)
     for (let i = 0; i < pageData.length; i++) {
       pageData[i].views = metricsMap[pageData[i]._id] || 0
@@ -260,12 +311,16 @@ export class PageController {
     const { startDate, endDate } = params
     const pageData = await this.pageRepository.getGroupQuestions()
     const pages = pageData.map((item: any) => item._id)
-    const metricsData = await this.metricsRepository.getTotalByPage(startDate, endDate, pages)
+    const metricsData = await this.metricsRepository.getTotalByPage(
+      new Date(startDate),
+      new Date(endDate),
+      pages
+    )
     const metricsMap = totalByPage(metricsData)
     for (let i = 0; i < pageData.length; i++) {
       pageData[i].views = metricsMap[pageData[i]._id] || 0
     }
-    return pageData
+    return { pageData, views: metricsMap }
   }
 
   @HttpCode(204)

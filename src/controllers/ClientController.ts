@@ -13,7 +13,6 @@ import {
   IsNumberString,
   Length,
   Min,
-  Max,
   IsISO8601,
   IsPositive
 } from 'class-validator'
@@ -53,7 +52,6 @@ export class CreateClientParams {
   vatin: string
 
   @Min(10000000)
-  @Max(99999999)
   counterID: number
 }
 
@@ -90,12 +88,16 @@ export class ClientController {
   async getClients(
     @QueryParams() params: GetClientsParams
     ) {
-    const { filter } = params
+    const { filter, startDate, endDate } = params
     const clientsData = await this.clientRepository.getAll(
       filter
     )
     const clients = clientsData.map((client: any) => client._id)
-    const viewsData = await this.pageRepository.getClientsPagesIDs(clients)
+    const viewsData = await this.pageRepository.getClientsTotal(
+      new Date(startDate),
+      new Date(endDate),
+      clients
+    )
     const viewsDataMap: any = {}
     for (let i = 0; i < viewsData.length; i += 1) {
       viewsDataMap[viewsData[i]._id] = viewsData[i].views
@@ -103,7 +105,7 @@ export class ClientController {
     for (let i = 0; i < clientsData.length; i += 1) {
       clientsData[i].views = viewsDataMap[clientsData[i]._id]
     }
-    return clientsData
+    return { clientsData, views: viewsDataMap }
   }
 
   @Authorized(['root', 'buchhalter'])

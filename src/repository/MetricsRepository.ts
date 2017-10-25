@@ -15,8 +15,8 @@ export class CreateMetricsParams {
 }
 
 interface IGetCostChartParams {
-  startDate: string,
-  endDate: string,
+  startDate: Date,
+  endDate: Date,
   interval: CHART_INTERVAL_TYPE,
   pageID: number
 }
@@ -100,14 +100,14 @@ export class MetricsRepository {
       .exec()
   }
 
-  lineChart(startDate: string, endDate: string, pages: number[]) {
+  lineChart(startDate: Date, endDate: Date, pages: number[]) {
     const pipeline = [
       {
         $match: {
           page: { $in: pages },
           date: {
-            $gte: new Date(startDate),
-            $lte: new Date(endDate)
+            $gte: startDate,
+            $lte: endDate
           },
           type: 'ad'
         }
@@ -163,14 +163,14 @@ export class MetricsRepository {
       .exec()
   }
 
-  getTotalByPage(startDate: string, endDate: string, pages: number[]) {
+  getTotalByPage(startDate: Date, endDate: Date, pages: number[]) {
     const pipeline = [
       {
         $match: {
           page: { $in: pages },
           date: {
-            $gte: new Date(startDate),
-            $lte: new Date(endDate)
+            $gte: startDate,
+            $lte: endDate
           },
           type: 'ad'
         }

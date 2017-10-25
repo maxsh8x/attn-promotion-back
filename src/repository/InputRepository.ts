@@ -12,8 +12,8 @@ interface IUpdateMetricsParams {
 }
 
 interface IGetCostChartParams {
-  startDate: string,
-  endDate: string,
+  startDate: Date,
+  endDate: Date,
   interval: CHART_INTERVAL_TYPE,
   pageID: number
 }

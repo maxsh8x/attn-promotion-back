@@ -9,8 +9,8 @@ moment.updateLocale('en', {
 })
 
 interface IGetCostPipelineParams {
-  startDate: string,
-  endDate: string,
+  startDate: Date,
+  endDate: Date,
   interval: CHART_INTERVAL_TYPE,
   pageID: number,
   byField: string,
@@ -65,8 +65,8 @@ export const getCostPipeline = (params: IGetCostPipelineParams) => {
       $match: {
         page: params.pageID,
         date: {
-          $gte: new Date(params.startDate),
-          $lte: new Date(params.endDate)
+          $gte: params.startDate,
+          $lte: params.endDate
         },
         type: params.matchType
       }

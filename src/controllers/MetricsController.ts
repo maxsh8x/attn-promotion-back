@@ -120,7 +120,11 @@ export class MetricsController {
     ) {
     const { startDate, endDate, urls } = params
     const pages = await this.pageRepository.getPagesByURLs(urls)
-    const data = await this.metricsRepository.lineChart(startDate, endDate, pages)
+    const data = await this.metricsRepository.lineChart(
+      new Date(startDate),
+      new Date(endDate),
+      pages
+    )
     return { data }
   }
 
@@ -131,8 +135,8 @@ export class MetricsController {
     ) {
     const { startDate, endDate, pageID, interval } = params
     const chartParams = {
-      startDate,
-      endDate,
+      startDate: new Date(startDate),
+      endDate: new Date(endDate),
       interval,
       pageID: parseInt(pageID, 10)
     }

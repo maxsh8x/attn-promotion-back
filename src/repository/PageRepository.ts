@@ -34,7 +34,7 @@ export class PageRepository {
       .exec()
   }
 
-  getClientsPagesIDs(clients: number[]) {
+  getClientsTotal(startDate: Date, endDate: Date, clients: number[]) {
     const pipeline = [
       {
         $match: {
@@ -53,7 +53,13 @@ export class PageRepository {
           connectFromField: 'page',
           connectToField: 'page',
           as: 'doc',
-          restrictSearchWithMatch: { type: 'ad' }
+          restrictSearchWithMatch: {
+            type: 'ad',
+            date: {
+              $gte: startDate,
+              $lte: endDate
+            }
+          }
         }
       },
       {
