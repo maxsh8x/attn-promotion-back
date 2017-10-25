@@ -287,9 +287,7 @@ export class PageController {
     const pageData = await this.pageRepository.getByClient(
       parseInt(clientID, 10)
     )
-    const pages = await this.pageRepository.getClientPagesID(
-      parseInt(clientID, 10)
-    )
+    const pages = pageData.map((page: any) => page._id)
     const metricsData = await this.metricsRepository.getTotalByPage(
       new Date(startDate),
       new Date(endDate),

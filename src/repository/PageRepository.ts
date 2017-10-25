@@ -34,6 +34,7 @@ export class PageRepository {
       .exec()
   }
 
+  // check match projection
   getClientsTotal(startDate: Date, endDate: Date, clients: number[]) {
     const pipeline = [
       {
@@ -83,13 +84,18 @@ export class PageRepository {
 
   getByClient(client: number): any {
     return Page
-      .find({'meta.client': client})
+      .find(
+      { 'meta.client': client },
+      {
+        url: 1,
+        title: 1,
+        type: 1,
+        active: 1,
+        meta: { $elemMatch: { client } }
+      }
+      )
       .lean()
       .exec()
-  }
-
-  getClientPagesID(client: number): any {
-    return Page.distinct('_id', { meta: { $elemMatch: { client } } })
   }
 
   getAll(params: IGetAllParams): any {
