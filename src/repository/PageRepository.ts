@@ -1,6 +1,5 @@
 import { Service } from 'typedi'
 import { Page } from '../models/Page'
-import { PageMeta } from '../models/PageMeta'
 
 interface IGetAllParams {
   limit: number,
@@ -30,13 +29,7 @@ export class PageRepository {
   getOne(pageID: number): any {
     return Page
       .findById(pageID)
-      .lean()
-      .exec()
-  }
-
-  getMetaByPage(pageID: number): any {
-    return PageMeta
-      .findById(pageID)
+      .populate('meta.client')
       .lean()
       .exec()
   }
@@ -45,12 +38,13 @@ export class PageRepository {
     const pipeline = [
       {
         $match: {
-          client: { $in: clients }
+          'meta.client': { $in: clients }
         }
       },
+      { $unwind: '$meta' },
       {
         $group: {
-          _id: { client: '$client', page: '$page' }
+          _id: { client: '$meta.client', page: '$_id' }
         }
       },
       {
@@ -82,83 +76,20 @@ export class PageRepository {
         }
       }
     ]
-    return PageMeta
+    return Page
       .aggregate(pipeline)
       .exec()
   }
 
   getByClient(client: number): any {
-    const pipeline = [
-      {
-        $match: {
-          client
-        }
-      },
-      {
-        $lookup: {
-          from: 'pages',
-          localField: 'page',
-          foreignField: '_id',
-          as: 'page_doc'
-        }
-      },
-      {
-        $unwind: '$page_doc'
-      },
-      {
-        $project: {
-          _id: '$page_doc._id',
-          active: '$page_doc.active',
-          url: '$page_doc.url',
-          title: '$page_doc.title',
-          type: '$page_doc.type',
-          parent: '$page_doc.parent'
-        }
-      }
-    ]
-    return PageMeta
-      .aggregate(pipeline)
-      .exec()
-  }
-
-  getByPage(page: number): any {
-    const pipeline = [
-      {
-        $match: {
-          page
-        }
-      },
-      {
-        $lookup: {
-          from: 'clients',
-          localField: 'client',
-          foreignField: '_id',
-          as: 'client_doc'
-        }
-      },
-      {
-        $unwind: '$client_doc'
-      },
-      {
-        $project: {
-          _id: '$client_doc._id',
-          name: '$client_doc.name',
-          brand: '$client_doc.brand',
-          vatin: '$client_doc.vatin',
-          minViews: '$minViews',
-          maxViews: '$maxViews',
-          startDate: '$startDate',
-          endDate: '$endDate'
-        }
-      }
-    ]
-    return PageMeta
-      .aggregate(pipeline)
+    return Page
+      .find({'meta.client': client})
+      .lean()
       .exec()
   }
 
   getClientPagesID(client: number): any {
-    return PageMeta.distinct('page', { client })
+    return Page.distinct('_id', { meta: { $elemMatch: { client } } })
   }
 
   getAll(params: IGetAllParams): any {
@@ -230,12 +161,13 @@ export class PageRepository {
     } = params
     const docs = clients.map(client => ({
       client,
-      page,
       minViews,
       maxViews,
       startDate,
       endDate
     }))
-    return PageMeta.create(docs)
+    return Page.update({ _id: page }, {
+      $pushAll: { meta: docs }
+    })
   }
 }

@@ -114,7 +114,7 @@ export class ClientController {
     @QueryParams() params: GetPageClientsParams
     ) {
     const { pageID } = params
-    const meta = await this.pageRepository.getByPage(
+    const { meta } = await this.pageRepository.getOne(
       parseInt(pageID, 10)
     )
     return meta

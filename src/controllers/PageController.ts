@@ -195,22 +195,21 @@ export class PageController {
       endDate
     } = params
     const title = await getTitle(url)
-    const createParams: any = { url, title, type }
-    if (type === 'related') {
-      createParams.parent = parent
-    }
-    const clientData = await this.clientRepository.getOne(client)
-    const counterID = clientData.counterID
-    const pageData = await this.pageRepository.create(createParams)
-    const { _id: pageID } = pageData
-    await this.pageRepository.bindClients({
-      page: pageID,
-      clients: [client],
-      minViews,
-      maxViews,
-      startDate: new Date(startDate),
-      endDate: new Date(endDate)
+    const pageData = await this.pageRepository.create({
+      url,
+      title,
+      parent,
+      type,
+      meta: [{
+        client,
+        minViews,
+        maxViews,
+        startDate,
+        endDate
+      }]
     })
+    const { _id: pageID } = pageData
+    const { counterID } = await this.clientRepository.getOne(client)
     const metricsData = await this.metricsRepository.getYMetrics(url, counterID)
     if (Object.keys(metricsData.data).length > 0) {
       try {
