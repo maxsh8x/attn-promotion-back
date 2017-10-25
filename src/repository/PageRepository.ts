@@ -34,6 +34,13 @@ export class PageRepository {
       .exec()
   }
 
+  getMetaByPage(pageID: number): any {
+    return PageMeta
+      .findById(pageID)
+      .lean()
+      .exec()
+  }
+
   getClientsTotal(startDate: Date, endDate: Date, clients: number[]) {
     const pipeline = [
       {
