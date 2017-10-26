@@ -29,7 +29,7 @@ export class UpdateMetricsParams {
   @IsPositive()
   pageID: number
 
-  @IsString()
+  @IsISO8601()
   yDate: string
 }
 
@@ -86,17 +86,26 @@ export class MetricsController {
     ) {
     const { pageID, yDate } = params
     const pageData = await this.pageRepository.getOne(pageID)
+    // TODO: to decorator
     if (pageData === null) {
       throw new NotFoundError('PageID not found')
     }
-    const { url, client } = pageData
-    const { counterID } = await this.clientRepository.getOne(client)
+    const { url, type } = pageData
+    let counterID: number | null = null
+    if (type === 'group') {
+      counterID = pageData.counterID
+    } else {
+      const clientData = await this.clientRepository.getOne(pageData.meta[0].client)
+      counterID = clientData.counterID
+    }
     const data = await this.metricsRepository.getYMetrics(url, counterID, yDate)
     if (Object.keys(data.data).length > 0) {
-      await this.metricsRepository.createMetrics([{
-        ...data,
-        pageID
-      }])
+      try {
+        await this.metricsRepository.createMetrics([{
+          ...data,
+          pageID
+        }])
+      } catch (e) { }
     }
     // TODO: issue
     return ''

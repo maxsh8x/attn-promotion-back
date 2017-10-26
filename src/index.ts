@@ -35,6 +35,8 @@ useContainer(Container);
       console.error(err)
     }
   })
+  expressApp.set('etag', false)
+
   await mongoose.connect(config.mongoDB, {
     useMongoClient: true
   })
