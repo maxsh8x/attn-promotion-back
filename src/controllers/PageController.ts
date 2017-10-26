@@ -8,7 +8,8 @@ import {
   Authorized,
   Patch,
   Param,
-  HttpCode
+  HttpCode,
+  BadRequestError
 } from 'routing-controllers'
 import {
   IsUrl,
@@ -156,6 +157,10 @@ export class PageController {
     ) {
     const { url, counterID } = params
     const title = await getTitle(url)
+    const isValidCID = await this.metricsRepository.isValidCounterID(counterID)
+    if (!isValidCID) {
+      throw new BadRequestError('INVALID_COUNTER_ID')
+    }
     const data = await this.pageRepository.create(
       {
         url,
