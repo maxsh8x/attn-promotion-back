@@ -23,6 +23,20 @@ interface IGetCostChartParams {
 
 @Service()
 export class MetricsRepository {
+  async isValidCounterID(counterID: number) {
+    try {
+      await axios().get('', {
+        params: {
+          ids: counterID,
+          preset: 'sources_summary'
+        }
+      })
+      return true
+    } catch (e) {
+      return false
+    }
+  }
+
   async getYMetrics(url: string, counterID: number, yDate = 'yesterday') {
     const basicParams = {
       ids: counterID,

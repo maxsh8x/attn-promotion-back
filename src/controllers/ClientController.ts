@@ -6,7 +6,8 @@ import {
   JsonController,
   QueryParams,
   Authorized,
-  HttpCode
+  HttpCode,
+  BadRequestError
 } from 'routing-controllers'
 import {
   IsString,
@@ -18,6 +19,7 @@ import {
 } from 'class-validator'
 import { ClientRepository } from '../repository/ClientRepository'
 import { PageRepository } from '../repository/PageRepository'
+import { MetricsRepository } from '../repository/MetricsRepository'
 
 export class GetClientsParams {
   @IsString()
@@ -80,7 +82,8 @@ export class BindClientParams {
 export class ClientController {
   constructor(
     private clientRepository: ClientRepository,
-    private pageRepository: PageRepository
+    private pageRepository: PageRepository,
+    private metricsRepository: MetricsRepository
   ) { }
 
   @Authorized(['root', 'buchhalter'])
@@ -141,6 +144,10 @@ export class ClientController {
     @Body() params: CreateClientParams
     ) {
     const { name, brand, vatin, counterID } = params
+    const isValidCID = await this.metricsRepository.isValidCounterID(counterID)
+    if (!isValidCID) {
+      throw new BadRequestError('INVALID_COUNTER_ID')
+    }
     await this.clientRepository.create({
       name,
       brand,
