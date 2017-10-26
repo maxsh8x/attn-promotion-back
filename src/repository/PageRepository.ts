@@ -104,7 +104,7 @@ export class PageRepository {
       ? { $text: { $search: filter } }
       : {}
     if (clients.length > 0) {
-      query.client = { $in: clients }
+      query['meta.client'] = { $in: clients }
     }
     return Page
       .find({ ...query, active }, '_id createdAt url title active type')
