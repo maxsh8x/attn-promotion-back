@@ -1,5 +1,6 @@
 import { Service } from 'typedi'
 import {
+  Get,
   Post,
   JsonController,
   Body,
@@ -13,7 +14,14 @@ import { TokenRepository } from '../repository/TokenRepository'
 import { ROLES_ARRAY, ROLES_TYPE } from '../constants'
 import { getPasswordHash, validatePassword } from '../utils/pass'
 import { getJWT } from '../utils/jwt'
-import { MinLength, MaxLength, IsEmail, IsIn, IsAlphanumeric } from 'class-validator'
+import {
+  MinLength,
+  MaxLength,
+  IsEmail,
+  IsIn,
+  IsAlphanumeric,
+  IsString
+} from 'class-validator'
 
 export class LoginParams {
   @IsAlphanumeric()
@@ -32,6 +40,9 @@ export class CreateUserParams extends LoginParams {
 
   @IsIn(ROLES_ARRAY)
   role: ROLES_TYPE
+
+  @IsString()
+  name: string
 }
 
 @Service()
@@ -76,14 +87,15 @@ export class UserController {
   @Authorized(['root'])
   @Post('/v1/user')
   async createUser( @Body() params: CreateUserParams) {
-    const { username, email, role, password } = params
+    const { username, name, email, role, password } = params
     const userFound = await this.userRepository.findByUsername(username)
     if (userFound) {
       throw new BadRequestError('USER_ALREADY_EXISTS')
     }
     const { salt, iterations, hash } = await getPasswordHash(password, 100000)
-    const { _id, balance } = await this.userRepository.create({
+    const { _id } = await this.userRepository.create({
       username,
+      name,
       hash,
       salt,
       iterations,
@@ -91,8 +103,15 @@ export class UserController {
       active: true,
       role: role as ROLES_TYPE
     })
-    await this.userRepository.initCache(_id, { balance })
+    await this.userRepository.initCache(_id, { active: true })
     // TODO: issue
     return ''
+  }
+
+  @Authorized(['root', 'buchhalter'])
+  @Get('/v1/user')
+  async getAll() {
+    const data = await this.userRepository.getAll()
+    return data
   }
 }

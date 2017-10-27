@@ -11,9 +11,10 @@ interface IData extends mongoose.Document {
   salt: string
   iterations: number
   active: boolean
-  balance: number
-  email: string
   role: ROLES_TYPE
+  name: string
+  email: string
+  clients: number[]
 }
 
 const Data = new mongoose.Schema(
@@ -24,9 +25,10 @@ const Data = new mongoose.Schema(
     salt: { type: String, required: true },
     iterations: { type: Number, required: true },
     active: { type: Boolean, required: true },
-    balance: { type: Number, default: 0 },
-    email: { type: String, required: true, unique: true },
-    role: { type: String, required: true, enum: ROLES_ARRAY }
+    role: { type: String, required: true, enum: ROLES_ARRAY },
+    name: { type: String, required: true },
+    email: { type: String, required: true },
+    clients: [Number]
   },
   {
     _id: false,

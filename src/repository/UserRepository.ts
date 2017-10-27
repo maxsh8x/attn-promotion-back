@@ -5,17 +5,17 @@ import { redisPub } from '../utils/redis'
 
 export interface ICreateParams {
   username: string
+  name: string
   hash: string
   salt: string
   iterations: number
   active: boolean
-  balance?: number
   email: string
   role: ROLES_TYPE
 }
 
 export interface IInitCacheParams {
-  balance: number
+  active: boolean
 }
 
 @Service()
@@ -37,5 +37,12 @@ export class UserRepository {
 
   getCache(userID: string) {
     return redisPub.hmget(`USER:${userID}`)
+  }
+
+  getAll() {
+    return User
+    .find({}, 'username name role email clients')
+    .lean()
+    .exec()
   }
 }
