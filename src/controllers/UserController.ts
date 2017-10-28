@@ -20,7 +20,8 @@ import {
   IsEmail,
   IsIn,
   IsAlphanumeric,
-  IsString
+  IsString,
+  IsPositive
 } from 'class-validator'
 
 export class LoginParams {
@@ -43,6 +44,14 @@ export class CreateUserParams extends LoginParams {
 
   @IsString()
   name: string
+}
+
+export class BindClientParams {
+  @IsPositive()
+  user: number
+
+  @IsPositive({ each: true })
+  clients: number[]
 }
 
 @Service()
@@ -113,5 +122,20 @@ export class UserController {
   async getAll() {
     const data = await this.userRepository.getAll()
     return data
+  }
+
+  @HttpCode(204)
+  @Authorized(['root'])
+  @Post('/v1/user/bind')
+  async bindClient(
+    @Body() params: BindClientParams
+    ) {
+    const {
+      user,
+      clients
+    } = params
+    await this.userRepository.bindClient(user, clients)
+    // TODO: issue
+    return ''
   }
 }

@@ -15,11 +15,13 @@ import {
   Length,
   Min,
   IsISO8601,
-  IsPositive
+  IsPositive,
+  IsOptional
 } from 'class-validator'
 import { ClientRepository } from '../repository/ClientRepository'
 import { PageRepository } from '../repository/PageRepository'
 import { MetricsRepository } from '../repository/MetricsRepository'
+import { UserRepository } from '../repository/UserRepository'
 
 export class GetClientsParams {
   @IsString()
@@ -30,6 +32,9 @@ export class GetClientsParams {
 
   @IsISO8601()
   endDate: string
+
+  @IsOptional()
+  user: string
 }
 
 export class GetPageClientsParams {
@@ -57,7 +62,7 @@ export class CreateClientParams {
   counterID: number
 }
 
-export class BindClientParams {
+export class BindPageParams {
   @IsPositive()
   page: number
 
@@ -83,23 +88,33 @@ export class ClientController {
   constructor(
     private clientRepository: ClientRepository,
     private pageRepository: PageRepository,
-    private metricsRepository: MetricsRepository
+    private metricsRepository: MetricsRepository,
+    private userRepository: UserRepository
   ) { }
 
   @Authorized(['root', 'buchhalter'])
   @Get('/v1/client/')
   async getClients(
-    @QueryParams() params: GetClientsParams
+    @QueryParams() params: GetClientsParams,
     ) {
-    const { filter, startDate, endDate } = params
+    const { filter, startDate, endDate, user } = params
+    const clients: number[] = []
+    if (user) {
+      const userData = await this.userRepository.getOne(parseInt(user, 10))
+      if (userData.clients.length === 0) {
+        return { clientsData: [], views: {} }
+      } else {
+        clients.push(...userData.clients)
+      }
+    }
     const clientsData = await this.clientRepository.getAll(
-      filter
+      filter,
+      clients
     )
-    const clients = clientsData.map((client: any) => client._id)
     const viewsData = await this.pageRepository.getClientsTotal(
       new Date(startDate),
       new Date(endDate),
-      clients
+      clientsData.map((client: any) => client._id)
     )
     const viewsDataMap: any = {}
     for (let i = 0; i < viewsData.length; i += 1) {
@@ -161,8 +176,8 @@ export class ClientController {
   @HttpCode(204)
   @Authorized(['root'])
   @Post('/v1/client/bind')
-  async bind(
-    @Body() params: BindClientParams
+  async bindPage(
+    @Body() params: BindPageParams
     ) {
     const {
       page,

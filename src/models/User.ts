@@ -28,7 +28,7 @@ const Data = new mongoose.Schema(
     role: { type: String, required: true, enum: ROLES_ARRAY },
     name: { type: String, required: true },
     email: { type: String, required: true },
-    clients: [Number]
+    clients: [{ type: Number, ref: 'Client', required: true }]
   },
   {
     _id: false,

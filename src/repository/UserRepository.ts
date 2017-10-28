@@ -31,6 +31,13 @@ export class UserRepository {
       .exec()
   }
 
+  getOne(userID: number): any {
+    return User
+      .findById(userID)
+      .lean()
+      .exec()
+  }
+
   initCache(userID: string, params: IInitCacheParams) {
     return redisPub.hmset(`USER:${userID}`, params)
   }
@@ -41,8 +48,19 @@ export class UserRepository {
 
   getAll() {
     return User
-    .find({}, 'username name role email clients')
-    .lean()
-    .exec()
+      .find({}, 'username name role email')
+      .lean()
+      .exec()
+  }
+
+  bindClient(userID: number, clients: number[]) {
+    return User
+      .findOneAndUpdate({
+        _id: userID
+      }, {
+        $addToSet: { clients: { $each: clients } }
+      })
+      .lean()
+      .exec()
   }
 }
