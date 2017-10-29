@@ -26,9 +26,17 @@ export class PageRepository {
     )
   }
 
-  getOne(pageID: number): any {
+  getOne(pageID: number, clients: number[], role: string): any {
+    const query: any = {
+      _id: pageID
+    }
+    const projection: any = {}
+    if (clients.length > 0 || role === 'manager') {
+      query['meta.client'] = { $in: clients }
+      projection.meta = { $elemMatch: { client: { $in: clients } } }
+    }
     return Page
-      .findById(pageID)
+      .findOne(query, projection)
       .populate('meta.client')
       .lean()
       .exec()
@@ -122,20 +130,45 @@ export class PageRepository {
 
   getActivePagesURL(): any {
     return Page
-      .find({ active: true }, '_id client url')
+      .find({ active: true }, '_id url')
       .lean()
       .exec()
+  }
+
+  getIndividualRelatedClients(): any {
+    return Page.
+    find({
+      active: true,
+      type: { $in: ['individual', 'related'] }
+    })
+    .cursor()
   }
 
   getPagesByURLs(urls: string[]): any {
     return Page.distinct('_id', { url: { $in: urls } })
   }
 
-  getGroupQuestions(): any {
+  getGroupQuestions(filter: string, clients: number[], role: string): any {
+    const query: any = {
+      type: 'group'
+    }
+    const projection: any = {
+      url: 1,
+      title: 1,
+      active: 1
+    }
+
+    // if (filter) {
+    //   query.$text = { $search: filter }
+    // }
+
+    if (clients.length > 0 || role === 'manager') {
+      query['meta.client'] = { $in: clients }
+      projection.meta = { $elemMatch: { client: { $in: clients } } }
+    }
+
     return Page
-      .find({
-        type: 'group'
-      })
+      .find(query, projection)
       .lean()
       .exec()
   }

@@ -11,7 +11,6 @@ import {
 } from 'routing-controllers'
 import {
   IsPositive,
-  IsString,
   IsUrl,
   IsISO8601,
   IsNumberString,
@@ -75,7 +74,7 @@ export class MetricsController {
     private metricsRepository: MetricsRepository,
     private pageRepository: PageRepository,
     private inputRepository: InputRepository,
-    private clientRepository: ClientRepository,
+    private clientRepository: ClientRepository
   ) { }
 
   @HttpCode(204)
@@ -85,7 +84,7 @@ export class MetricsController {
     @Body() params: UpdateMetricsParams
     ) {
     const { pageID, yDate } = params
-    const pageData = await this.pageRepository.getOne(pageID)
+    const pageData = await this.pageRepository.getOne(pageID, [], 'root')
     // TODO: to decorator
     if (pageData === null) {
       throw new NotFoundError('PageID not found')

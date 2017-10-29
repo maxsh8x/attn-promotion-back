@@ -9,7 +9,8 @@ import {
   Patch,
   Param,
   HttpCode,
-  BadRequestError
+  BadRequestError,
+  CurrentUser
 } from 'routing-controllers'
 import {
   IsUrl,
@@ -29,6 +30,7 @@ import { PageRepository } from '../repository/PageRepository'
 import { MetricsRepository } from '../repository/MetricsRepository'
 import { InputRepository } from '../repository/InputRepository'
 import { ClientRepository } from '../repository/ClientRepository'
+import { UserRepository } from '../repository/UserRepository'
 import { getTitle } from '../utils/page'
 import { totalByPage } from '../utils/metrics'
 import { sources } from '../constants'
@@ -147,7 +149,8 @@ export class PageController {
     private pageRepository: PageRepository,
     private metricsRepository: MetricsRepository,
     private inputRepository: InputRepository,
-    private clientRepository: ClientRepository
+    private clientRepository: ClientRepository,
+    private userRepository: UserRepository
   ) { }
 
   @Authorized(['root'])
@@ -283,7 +286,7 @@ export class PageController {
     }
   }
 
-  @Authorized(['root', 'buchhalter'])
+  @Authorized(['root', 'buchhalter', 'manager'])
   @Get('/v1/page/client')
   async getClientPages(
     @QueryParams() params: GetClientPagesParams
@@ -305,13 +308,20 @@ export class PageController {
     return pageData
   }
 
-  @Authorized(['root'])
+  @Authorized(['root', 'buchhalter', 'manager'])
   @Get('/v1/page/group-questions')
   async groupQuestions(
-    @QueryParams() params: GetGroupQuestionParams
+    @QueryParams() params: GetGroupQuestionParams,
+    @CurrentUser({ required: true }) user: any
     ) {
+    const { userID, role } = user
     const { startDate, endDate } = params
-    const pageData = await this.pageRepository.getGroupQuestions()
+    const clients: any = []
+    if (role === 'manager') {
+      const userData = await this.userRepository.getOne(userID)
+      clients.push(...userData.clients)
+    }
+    const pageData = await this.pageRepository.getGroupQuestions('', clients, role)
     const pages = pageData.map((item: any) => item._id)
     const metricsData = await this.metricsRepository.getTotalByPage(
       new Date(startDate),

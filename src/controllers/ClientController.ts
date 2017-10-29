@@ -7,7 +7,8 @@ import {
   QueryParams,
   Authorized,
   HttpCode,
-  BadRequestError
+  BadRequestError,
+  CurrentUser
 } from 'routing-controllers'
 import {
   IsString,
@@ -92,14 +93,20 @@ export class ClientController {
     private userRepository: UserRepository
   ) { }
 
-  @Authorized(['root', 'buchhalter'])
+  @Authorized(['root', 'buchhalter', 'manager'])
   @Get('/v1/client/')
   async getClients(
     @QueryParams() params: GetClientsParams,
+    @CurrentUser({ required: true }) userData: any
     ) {
+    const { userID, role } = userData
     const { filter, startDate, endDate, user } = params
     const clients: number[] = []
-    if (user) {
+    if (role === 'manager') {
+      const userData = await this.userRepository.getOne(userID)
+      clients.push(...userData.clients)
+    }
+    if (user && role !== 'manager') {
       const userData = await this.userRepository.getOne(parseInt(user, 10))
       if (userData.clients.length === 0) {
         return { clientsData: [], views: {} }
@@ -109,7 +116,8 @@ export class ClientController {
     }
     const clientsData = await this.clientRepository.getAll(
       filter,
-      clients
+      clients,
+      role
     )
     const viewsData = await this.pageRepository.getClientsTotal(
       new Date(startDate),
@@ -126,14 +134,23 @@ export class ClientController {
     return { clientsData, views: viewsDataMap }
   }
 
-  @Authorized(['root', 'buchhalter'])
+  @Authorized(['root', 'buchhalter', 'manager'])
   @Get('/v1/client/page')
   async getPageClients(
-    @QueryParams() params: GetPageClientsParams
+    @QueryParams() params: GetPageClientsParams,
+    @CurrentUser({ required: true }) user: any
     ) {
+    const { userID, role } = user
     const { pageID } = params
+    const clients: any[] = []
+    if (role === 'manager') {
+      const userData = await this.userRepository.getOne(userID)
+      clients.push(...userData.clients)
+    }
     const { meta } = await this.pageRepository.getOne(
-      parseInt(pageID, 10)
+      parseInt(pageID, 10),
+      clients,
+      role
     )
     return meta
   }

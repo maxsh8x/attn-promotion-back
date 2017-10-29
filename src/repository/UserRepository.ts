@@ -63,4 +63,15 @@ export class UserRepository {
       .lean()
       .exec()
   }
+
+  unbindClient(userID: number, clients: number[]) {
+    return User
+      .findOneAndUpdate({
+        _id: userID
+      }, {
+        $pull: { clients: { $in: clients } }
+      })
+      .lean()
+      .exec()
+  }
 }

@@ -52,6 +52,9 @@ export class BindClientParams {
 
   @IsPositive({ each: true })
   clients: number[]
+
+  @IsIn(['bind', 'unbind'])
+  action: 'bind' | 'unbind'
 }
 
 @Service()
@@ -132,9 +135,16 @@ export class UserController {
     ) {
     const {
       user,
-      clients
+      clients,
+      action
     } = params
-    await this.userRepository.bindClient(user, clients)
+    switch (action) {
+      case 'bind':
+        await this.userRepository.bindClient(user, clients)
+        break
+      case 'unbind':
+        await this.userRepository.unbindClient(user, clients)
+    }
     // TODO: issue
     return ''
   }

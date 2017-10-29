@@ -92,7 +92,8 @@ export const getCostPipeline = (params: IGetCostPipelineParams) => {
         secondary: '$_id.secondary',
         value: 1
       }
-    }
+    },
+    { $sort : { primary : 1, secondary: 1 } }
   ]
   return pipeline
 }

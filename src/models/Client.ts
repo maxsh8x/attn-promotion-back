@@ -12,8 +12,8 @@ const Data = new mongoose.Schema(
     _id: Number,
     name: { type: String, required: true },
     brand: { type: String, required: true },
-    vatin: { type: String, required: true, unique: true },
-    counterID: { type: Number, required: true, unique: true }
+    vatin: { type: String, required: true },
+    counterID: { type: Number, required: true }
   },
   {
     _id: false,
