@@ -5,6 +5,7 @@ import {
   Body,
   JsonController,
   QueryParams,
+  QueryParam,
   Authorized,
   Patch,
   Param,
@@ -313,6 +314,16 @@ export class PageController {
       pageData[i].views = metricsMap[pageData[i]._id] || 0
     }
     return pageData
+  }
+
+  @Authorized(['root', 'buchhalter'])
+  @Get('/v1/page/clientsList')
+  async getClients(
+    @QueryParam('pageID') pageID: number
+    ) {
+    const clientsIDs = await this.pageRepository.getPageClients(pageID)
+    const clientsNames = await this.clientRepository.convertIDtoName(clientsIDs)
+    return clientsNames
   }
 
   @Authorized(['root', 'buchhalter', 'manager'])

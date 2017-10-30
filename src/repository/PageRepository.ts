@@ -43,6 +43,11 @@ export class PageRepository {
       .exec()
   }
 
+  getPageClients(pageID: number) {
+    return Page
+      .distinct('meta.client', { _id: pageID })
+  }
+
   // check match projection
   getClientsTotal(startDate: Date, endDate: Date, clients: number[]) {
     const pipeline = [

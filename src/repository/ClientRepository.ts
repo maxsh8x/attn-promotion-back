@@ -23,6 +23,11 @@ export class ClientRepository {
       .exec()
   }
 
+  convertIDtoName(clientIDs: number[]): any {
+    return Client
+      .distinct('name', { _id: { $in: clientIDs } })
+  }
+
   getAll(filter: string, clients: number[], role: string): any {
     const query: any = {}
     if (filter) {
