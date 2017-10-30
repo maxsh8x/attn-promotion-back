@@ -171,7 +171,7 @@ export class MetricsRepository {
       interval,
       pageID,
       byField: 'pageviews',
-      matchType: 'ad'
+      matchType: 'total'
     })
     return Metrics
       .aggregate(pipeline)
