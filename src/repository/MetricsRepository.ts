@@ -42,15 +42,16 @@ export class MetricsRepository {
       ids: counterID,
       date1: yDate,
       date2: yDate,
-      filters: `ym:s:startURL=='${url}'`,
       metrics: 'ym:s:pageviews,ym:s:pageDepth,ym:s:avgVisitDurationSeconds,ym:s:bounceRate'
     }
     const networks = {
       ...basicParams,
+      filters: `ym:s:startURL=='${url}'`,
       dimensions: 'ym:s:UTMSource,ym:s:startURL'
     }
     const meta = {
       ...basicParams,
+      filters: `ym:s:startURL=='${url}'`,
       dimensions: 'ym:s:<attribution>TrafficSource'
     }
     // TODO: 404 if counterID not found
