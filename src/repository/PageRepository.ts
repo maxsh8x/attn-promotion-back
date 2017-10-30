@@ -14,6 +14,7 @@ interface IBindClientParams {
   clients: number[]
   minViews: number
   maxViews: number
+  costPerClick: number
   startDate: Date
   endDate: Date
 }
@@ -53,7 +54,11 @@ export class PageRepository {
       { $unwind: '$meta' },
       {
         $group: {
-          _id: { client: '$meta.client', page: '$_id' }
+          _id: {
+            client: '$meta.client',
+            costPerClick: '$meta.costPerClick',
+            page: '$_id'
+          }
         }
       },
       {
@@ -64,7 +69,7 @@ export class PageRepository {
           connectToField: 'page',
           as: 'doc',
           restrictSearchWithMatch: {
-            type: 'ad',
+            type: 'total',
             date: {
               $gte: startDate,
               $lte: endDate
@@ -75,12 +80,14 @@ export class PageRepository {
       {
         $project: {
           _id: '$_id.client',
+          costPerClick: '$_id.costPerClick',
           views: { $sum: '$doc.pageviews' }
         }
       },
       {
         $group: {
           _id: '$_id',
+          costPerClick: { $sum: '$costPerClick' },
           views: { $sum: '$views' }
         }
       }
@@ -137,11 +144,11 @@ export class PageRepository {
 
   getIndividualRelatedClients(): any {
     return Page.
-    find({
-      active: true,
-      type: { $in: ['individual', 'related'] }
-    })
-    .cursor()
+      find({
+        active: true,
+        type: { $in: ['individual', 'related'] }
+      })
+      .cursor()
   }
 
   getPagesByURLs(urls: string[]): any {
@@ -195,6 +202,7 @@ export class PageRepository {
       clients,
       minViews,
       maxViews,
+      costPerClick,
       startDate,
       endDate
     } = params
@@ -202,6 +210,7 @@ export class PageRepository {
       client,
       minViews,
       maxViews,
+      costPerClick,
       startDate,
       endDate
     }))

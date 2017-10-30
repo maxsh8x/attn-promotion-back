@@ -29,6 +29,7 @@ const Meta = new mongoose.Schema(
     maxViews: { type: Number, required: true },
     startDate: { type: Date, required: true },
     endDate: { type: Date, required: true },
+    costPerClick: { type: Number, required: true }
   },
   {
     _id: false

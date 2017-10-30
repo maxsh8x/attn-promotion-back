@@ -41,15 +41,15 @@ useContainer(Container);
     useMongoClient: true
   })
 
-  const agenda = new Agenda({ db: { address: config.agendaMongoDB } })
-  agenda.define('update metrics', (job, done) => {
-    task.updateAllMetrics(job, done)
-  })
+  // const agenda = new Agenda({ db: { address: config.agendaMongoDB } })
+  // agenda.define('update metrics', (job, done) => {
+  //   task.updateAllMetrics(job, done)
+  // })
 
-  agenda.on('ready', () => {
-    agenda.every('0 8 * * *', 'update metrics')
-    agenda.start()
-  })
+  // agenda.on('ready', () => {
+  //   agenda.every('0 8 * * *', 'update metrics')
+  //   agenda.start()
+  // })
 
   expressApp.listen(config.port)
   console.info(`Server is up and running at port ${config.port}`)

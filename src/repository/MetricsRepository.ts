@@ -37,21 +37,20 @@ export class MetricsRepository {
     }
   }
 
-  async getYMetrics(url: string, counterID: number, yDate = 'yesterday') {
+  async getYMetrics(startURLPath: string, counterID: number, yDate = 'yesterday') {
     const basicParams = {
       ids: counterID,
       date1: yDate,
       date2: yDate,
+      filters: `ym:s:startURLPath=='${startURLPath}'`,
       metrics: 'ym:s:pageviews,ym:s:pageDepth,ym:s:avgVisitDurationSeconds,ym:s:bounceRate'
     }
     const networks = {
       ...basicParams,
-      filters: `ym:s:startURL=='${url}'`,
-      dimensions: 'ym:s:UTMSource,ym:s:startURL'
+      dimensions: 'ym:s:UTMSource,ym:s:startURLPath'
     }
     const meta = {
       ...basicParams,
-      filters: `ym:s:startURL=='${url}'`,
       dimensions: 'ym:s:<attribution>TrafficSource'
     }
     // TODO: 404 if counterID not found
@@ -124,7 +123,7 @@ export class MetricsRepository {
             $gte: startDate,
             $lte: endDate
           },
-          type: 'ad'
+          type: 'total'
         }
       },
       {
@@ -187,7 +186,7 @@ export class MetricsRepository {
             $gte: startDate,
             $lte: endDate
           },
-          type: 'ad'
+          type: 'total'
         }
       },
       {

@@ -109,7 +109,7 @@ export class ClientController {
     if (user && role !== 'manager') {
       const userData = await this.userRepository.getOne(parseInt(user, 10))
       if (userData.clients.length === 0) {
-        return { clientsData: [], views: {} }
+        return { clientsData: [], views: {}, costPerClick: {} }
       } else {
         clients.push(...userData.clients)
       }
@@ -119,19 +119,22 @@ export class ClientController {
       clients,
       role
     )
-    const viewsData = await this.pageRepository.getClientsTotal(
+    const totalData = await this.pageRepository.getClientsTotal(
       new Date(startDate),
       new Date(endDate),
       clientsData.map((client: any) => client._id)
     )
     const viewsDataMap: any = {}
-    for (let i = 0; i < viewsData.length; i += 1) {
-      viewsDataMap[viewsData[i]._id] = viewsData[i].views
+    const costPerClickDataMap: any = {}
+    for (let i = 0; i < totalData.length; i += 1) {
+      viewsDataMap[totalData[i]._id] = totalData[i].views
+      costPerClickDataMap[totalData[i]._id] = totalData[i].costPerClick
     }
     for (let i = 0; i < clientsData.length; i += 1) {
       clientsData[i].views = viewsDataMap[clientsData[i]._id]
+      clientsData[i].costPerClick = costPerClickDataMap[clientsData[i]._id]
     }
-    return { clientsData, views: viewsDataMap }
+    return { clientsData, views: viewsDataMap, costPerClick: costPerClickDataMap }
   }
 
   @Authorized(['root', 'buchhalter', 'manager'])

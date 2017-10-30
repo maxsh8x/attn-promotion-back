@@ -31,7 +31,7 @@ import { MetricsRepository } from '../repository/MetricsRepository'
 import { InputRepository } from '../repository/InputRepository'
 import { ClientRepository } from '../repository/ClientRepository'
 import { UserRepository } from '../repository/UserRepository'
-import { getTitle } from '../utils/page'
+import { getTitle, getStartURLPath } from '../utils/page'
 import { totalByPage } from '../utils/metrics'
 import { sources } from '../constants'
 
@@ -49,6 +49,9 @@ export class BasicCreatorParams {
 
   @IsPositive()
   maxViews: number
+
+  @IsPositive()
+  costPerClick: number
 
   @IsISO8601()
   startDate: string
@@ -158,8 +161,9 @@ export class PageController {
   async createGroupPage(
     @Body() params: CreateGroupPageParams
     ) {
-    const { url, counterID } = params
-    const title = await getTitle(url)
+    const { url: rawURL, counterID } = params
+    const url = getStartURLPath(rawURL)
+    const title = await getTitle(rawURL)
     const isValidCID = await this.metricsRepository.isValidCounterID(counterID)
     if (!isValidCID) {
       throw new BadRequestError('INVALID_COUNTER_ID')
@@ -193,16 +197,18 @@ export class PageController {
     @Body() params: CreatePageParams
     ) {
     const {
-      url,
+      url: rawURL,
       client,
       type,
       parent,
       minViews,
       maxViews,
+      costPerClick,
       startDate,
       endDate
     } = params
-    const title = await getTitle(url)
+    const url = getStartURLPath(rawURL)
+    const title = await getTitle(rawURL)
     const pageData = await this.pageRepository.create({
       url,
       title,
@@ -212,6 +218,7 @@ export class PageController {
         client,
         minViews,
         maxViews,
+        costPerClick,
         startDate,
         endDate
       }]
@@ -367,12 +374,13 @@ export class PageController {
   async bindClients(
     @Body() params: BindClientsParams
     ) {
-    const { page, clients, minViews, maxViews, startDate, endDate } = params
+    const { page, clients, minViews, maxViews, costPerClick, startDate, endDate } = params
     await this.pageRepository.bindClients({
       page,
       clients,
       minViews,
       maxViews,
+      costPerClick,
       startDate: new Date(startDate),
       endDate: new Date(endDate)
     })
