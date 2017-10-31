@@ -126,18 +126,16 @@ export class PageRepository {
     if (clients.length > 0) {
       query['meta.client'] = { $in: clients }
     }
-    return Page
+    return Promise.all([
+      Page
       .find({ ...query, active }, '_id createdAt url title active type')
       .limit(limit)
       .skip(offset)
       .lean()
-      .exec()
-  }
-
-  count(active = true): any {
-    return Page.count({
-      active
-    })
+      .exec(),
+      Page.count({ ...query, active: true }),
+      Page.count({ ...query, active: false }),
+    ])
   }
 
   getActivePagesURL(): any {

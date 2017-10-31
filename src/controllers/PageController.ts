@@ -249,16 +249,16 @@ export class PageController {
     return { title }
   }
 
-  @Authorized(['root', 'buchhalter'])
-  @Get('/v1/page/count')
-  async count(
-    @QueryParams() params: CountParams
-    ) {
-    const { active } = params
-    const isActive = (active === 'true')
-    const count = await this.pageRepository.count(isActive)
-    return count
-  }
+  // @Authorized(['root', 'buchhalter'])
+  // @Get('/v1/page/count')
+  // async count(
+  //   @QueryParams() params: CountParams
+  //   ) {
+  //   const { active } = params
+  //   const isActive = (active === 'true')
+  //   const count = await this.pageRepository.count(isActive)
+  //   return count
+  // }
 
   @Authorized(['root', 'buchhalter'])
   @Get('/v1/page/')
@@ -272,7 +272,7 @@ export class PageController {
       .filter(x => parseInt(x, 10))
       .map(x => parseInt(x, 10))
     const isActive = (active === 'true')
-    const pages = await this.pageRepository.getAll({
+    const [pages, activePages, inactivePages] = await this.pageRepository.getAll({
       limit: parseInt(limit, 10),
       offset: parseInt(offset, 10),
       active: isActive,
@@ -283,8 +283,8 @@ export class PageController {
       pages.map((item: any) => item._id),
       yDate
     )
-    const activePages = await this.pageRepository.count(true)
-    const inactivePages = await this.pageRepository.count(false)
+    // const activePages = await this.pageRepository.count(true)
+    // const inactivePages = await this.pageRepository.count(false)
     return {
       pages,
       input,
