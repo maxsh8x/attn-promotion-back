@@ -24,7 +24,15 @@ import { PageRepository } from '../repository/PageRepository'
 import { MetricsRepository } from '../repository/MetricsRepository'
 import { UserRepository } from '../repository/UserRepository'
 
-export class GetClientsParams {
+export class PaginationParams {
+  @IsNumberString()
+  limit: string
+
+  @IsNumberString()
+  offset: string
+}
+
+export class GetClientsParams extends PaginationParams {
   @IsString()
   filter: string
 
@@ -100,7 +108,7 @@ export class ClientController {
     @CurrentUser({ required: true }) userData: any
     ) {
     const { userID, role } = userData
-    const { filter, startDate, endDate, user } = params
+    const { filter, startDate, endDate, user, limit, offset } = params
     const clients: number[] = []
     if (role === 'manager') {
       const userData = await this.userRepository.getOne(userID)
@@ -109,16 +117,23 @@ export class ClientController {
     if (user && role !== 'manager') {
       const userData = await this.userRepository.getOne(parseInt(user, 10))
       if (userData.clients.length === 0) {
-        return { clientsData: [], views: {}, costPerClick: {} }
+        return {
+          clientsData: [],
+          views: {},
+          costPerClick: {},
+          total: 0
+        }
       } else {
         clients.push(...userData.clients)
       }
     }
-    const clientsData = await this.clientRepository.getAll(
+    const [clientsData, total]: [any, number] = await this.clientRepository.getAll({
+      limit: parseInt(limit, 10),
+      offset: parseInt(offset, 10),
       filter,
       clients,
       role
-    )
+    })
     const totalData = await this.pageRepository.getClientsTotal(
       new Date(startDate),
       new Date(endDate),
@@ -134,7 +149,12 @@ export class ClientController {
       clientsData[i].views = viewsDataMap[clientsData[i]._id]
       clientsData[i].costPerClick = costPerClickDataMap[clientsData[i]._id]
     }
-    return { clientsData, views: viewsDataMap, costPerClick: costPerClickDataMap }
+    return {
+      costPerClick: costPerClickDataMap,
+      views: viewsDataMap,
+      clientsData,
+      total
+    }
   }
 
   @Authorized(['root', 'buchhalter', 'manager'])

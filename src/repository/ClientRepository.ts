@@ -1,6 +1,14 @@
 import { Service } from 'typedi'
 import { Client } from '../models/Client'
 
+interface IGetAll {
+  limit: number
+  offset: number
+  filter: string
+  clients: number[]
+  role: string
+}
+
 @Service()
 export class ClientRepository {
   create(params: any): any {
@@ -28,7 +36,8 @@ export class ClientRepository {
       .distinct('name', { _id: { $in: clientIDs } })
   }
 
-  getAll(filter: string, clients: number[], role: string): any {
+  getAll(params: IGetAll): any {
+    const { limit, offset, filter, clients, role } = params
     const query: any = {}
     if (filter) {
       query.$text = { $search: filter }
@@ -36,10 +45,16 @@ export class ClientRepository {
     if (clients.length > 0 || role === 'manager') {
       query._id = { $in: clients }
     }
-    return Client
-      .find(query, '_id name counterID brand vatin')
-      .lean()
-      .exec()
+    return Promise.all([
+      Client
+        .find(query, '_id name counterID brand vatin')
+        .skip(offset)
+        .limit(limit)
+        .lean()
+        .exec(),
+      Client
+        .count(query)
+    ])
   }
 
   search(filter: string, limit: number): any {
