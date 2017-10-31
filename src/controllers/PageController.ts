@@ -44,7 +44,7 @@ export class CreateGroupPageParams {
   counterID: number
 }
 
-export class BasicCreatorParams {
+export class BaseCreatorParams {
   @IsPositive()
   minViews: number
 
@@ -61,7 +61,15 @@ export class BasicCreatorParams {
   endDate: string
 }
 
-export class CreatePageParams extends BasicCreatorParams {
+export class BasePaginationParams {
+  @IsNumberString()
+  offset: string
+
+  @IsNumberString()
+  limit: string
+}
+
+export class CreatePageParams extends BaseCreatorParams {
   @IsUrl()
   url: string
 
@@ -91,13 +99,7 @@ export class CountParams {
   active: string
 }
 
-export class GetPagesParams {
-  @IsNumberString()
-  offset: string
-
-  @IsNumberString()
-  limit: string
-
+export class GetPagesParams extends BasePaginationParams {
   @IsString()
   yDate: string
 
@@ -122,7 +124,7 @@ export class GetClientPagesParams {
   clientID: string
 }
 
-export class GetGroupQuestionParams {
+export class GetGroupQuestionParams extends BasePaginationParams {
   @IsISO8601()
   startDate: string
 
@@ -135,7 +137,7 @@ export class SearchPagesParams {
   filter: string
 }
 
-export class BindClientsParams extends BasicCreatorParams {
+export class BindClientsParams extends BaseCreatorParams {
   @IsPositive()
   page: number
 
@@ -333,13 +335,19 @@ export class PageController {
     @CurrentUser({ required: true }) user: any
     ) {
     const { userID, role } = user
-    const { startDate, endDate } = params
+    const { startDate, endDate, limit, offset } = params
     const clients: any = []
     if (role === 'manager') {
       const userData = await this.userRepository.getOne(userID)
       clients.push(...userData.clients)
     }
-    const pageData = await this.pageRepository.getGroupQuestions('', clients, role)
+    const [pageData, total] = await this.pageRepository.getGroupQuestions({
+      filter: '',
+      offset: parseInt(offset, 10),
+      limit: parseInt(limit, 10),
+      clients,
+      role
+    })
     const pages = pageData.map((item: any) => item._id)
     const metricsData = await this.metricsRepository.getTotalByPage(
       new Date(startDate),
@@ -350,7 +358,7 @@ export class PageController {
     for (let i = 0; i < pageData.length; i++) {
       pageData[i].views = metricsMap[pageData[i]._id] || 0
     }
-    return { pageData, views: metricsMap }
+    return { pageData, views: metricsMap, total }
   }
 
   @HttpCode(204)

@@ -19,6 +19,14 @@ interface IBindClientParams {
   endDate: Date
 }
 
+interface IGetGroupQuestionsParams {
+  limit: number
+  offset: number
+  filter: string
+  clients: number[]
+  role: string
+}
+
 @Service()
 export class PageRepository {
   create(params: any): any {
@@ -128,11 +136,11 @@ export class PageRepository {
     }
     return Promise.all([
       Page
-      .find({ ...query, active }, '_id createdAt url title active type')
-      .limit(limit)
-      .skip(offset)
-      .lean()
-      .exec(),
+        .find({ ...query, active }, '_id createdAt url title active type')
+        .limit(limit)
+        .skip(offset)
+        .lean()
+        .exec(),
       Page.count({ ...query, active: true }),
       Page.count({ ...query, active: false }),
     ])
@@ -158,7 +166,8 @@ export class PageRepository {
     return Page.distinct('_id', { url: { $in: urls } })
   }
 
-  getGroupQuestions(filter: string, clients: number[], role: string): any {
+  getGroupQuestions(params: IGetGroupQuestionsParams): any {
+    const { filter, clients, role, limit, offset } = params
     const query: any = {
       type: 'group'
     }
@@ -177,10 +186,13 @@ export class PageRepository {
       projection.meta = { $elemMatch: { client: { $in: clients } } }
     }
 
-    return Page
-      .find(query, projection)
-      .lean()
-      .exec()
+    return Promise.all([
+      Page
+        .find(query, projection)
+        .lean()
+        .exec(),
+      Page.count(query)
+    ])
   }
 
   updateStatus(pageID: number, active: boolean): any {
