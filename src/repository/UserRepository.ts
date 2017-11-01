@@ -46,11 +46,17 @@ export class UserRepository {
     return redisPub.hmget(`USER:${userID}`)
   }
 
-  getAll() {
-    return User
-      .find({}, 'username name role email')
-      .lean()
-      .exec()
+  getAll(limit: number, offset: number): any {
+    const query: any = {}
+    return Promise.all([
+      User
+        .find(query, 'username name role email')
+        .limit(limit)
+        .skip(offset)
+        .lean()
+        .exec(),
+      User.count(query)
+    ])
   }
 
   bindClient(userID: number, clients: number[]) {

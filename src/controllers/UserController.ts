@@ -7,7 +7,8 @@ import {
   Authorized,
   NotFoundError,
   BadRequestError,
-  HttpCode
+  HttpCode,
+  QueryParams
 } from 'routing-controllers'
 import { UserRepository } from '../repository/UserRepository'
 import { TokenRepository } from '../repository/TokenRepository'
@@ -21,8 +22,17 @@ import {
   IsIn,
   IsAlphanumeric,
   IsString,
-  IsPositive
+  IsPositive,
+  IsNumberString,
 } from 'class-validator'
+
+export class BasePaginationParams {
+  @IsNumberString()
+  offset: string
+
+  @IsNumberString()
+  limit: string
+}
 
 export class LoginParams {
   @IsAlphanumeric()
@@ -122,9 +132,15 @@ export class UserController {
 
   @Authorized(['root', 'buchhalter'])
   @Get('/v1/user')
-  async getAll() {
-    const data = await this.userRepository.getAll()
-    return data
+  async getAll(
+    @QueryParams() params: BasePaginationParams
+  ) {
+    const { limit, offset } = params
+    const [usersData, total] = await this.userRepository.getAll(
+      parseInt(limit, 10),
+      parseInt(offset, 10)
+    )
+    return { usersData, total }
   }
 
   @HttpCode(204)
