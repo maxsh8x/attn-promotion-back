@@ -110,20 +110,23 @@ export class PageRepository {
       .exec()
   }
 
-  getByClient(client: number): any {
-    return Page
-      .find(
-      { 'meta.client': client },
-      {
-        url: 1,
-        title: 1,
-        type: 1,
-        active: 1,
-        meta: { $elemMatch: { client } }
-      }
-      )
-      .lean()
-      .exec()
+  getByClient(client: number, limit: number, offset: number): any {
+    const query: any = { 'meta.client': client }
+    return Promise.all([
+      Page
+        .find(query,
+        {
+          url: 1,
+          title: 1,
+          type: 1,
+          active: 1,
+          meta: { $elemMatch: { client } }
+        }
+        )
+        .lean()
+        .exec(),
+      Page.count(query)
+    ])
   }
 
   getAll(params: IGetAllParams): any {

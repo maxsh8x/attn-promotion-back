@@ -113,7 +113,7 @@ export class GetPagesParams extends BasePaginationParams {
   clients: string
 }
 
-export class GetClientPagesParams {
+export class GetClientPagesParams extends BasePaginationParams {
   @IsISO8601()
   startDate: string
 
@@ -301,21 +301,23 @@ export class PageController {
   async getClientPages(
     @QueryParams() params: GetClientPagesParams
     ) {
-    const { clientID, startDate, endDate } = params
-    const pageData = await this.pageRepository.getByClient(
-      parseInt(clientID, 10)
+    const { clientID, startDate, endDate, limit, offset } = params
+    const [pagesData, total] = await this.pageRepository.getByClient(
+      parseInt(clientID, 10),
+      parseInt(limit, 10),
+      parseInt(offset, 10)
     )
-    const pages = pageData.map((page: any) => page._id)
+    const pages = pagesData.map((page: any) => page._id)
     const metricsData = await this.metricsRepository.getTotalByPage(
       new Date(startDate),
       new Date(endDate),
       pages
     )
     const metricsMap = totalByPage(metricsData)
-    for (let i = 0; i < pageData.length; i++) {
-      pageData[i].views = metricsMap[pageData[i]._id] || 0
+    for (let i = 0; i < pagesData.length; i++) {
+      pagesData[i].views = metricsMap[pagesData[i]._id] || 0
     }
-    return pageData
+    return { pagesData, total }
   }
 
   @Authorized(['root', 'buchhalter'])
