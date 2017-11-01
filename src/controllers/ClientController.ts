@@ -46,7 +46,7 @@ export class GetClientsParams extends PaginationParams {
   user: string
 }
 
-export class GetPageClientsParams {
+export class GetPageClientsParams extends PaginationParams {
   @IsNumberString()
   pageID: string
 }
@@ -164,18 +164,21 @@ export class ClientController {
     @CurrentUser({ required: true }) user: any
     ) {
     const { userID, role } = user
-    const { pageID } = params
+    const { pageID, limit, offset } = params
     const clients: any[] = []
     if (role === 'manager') {
       const userData = await this.userRepository.getOne(userID)
       clients.push(...userData.clients)
     }
-    const { meta } = await this.pageRepository.getOne(
-      parseInt(pageID, 10),
+    const clientsData = await this.pageRepository.getPageClientsData({
+      clientsLimit: parseInt(limit, 10),
+      clientsOffset: parseInt(offset, 10),
+      pageID: parseInt(pageID, 10),
       clients,
       role
-    )
-    return meta
+    })
+    const total = clientsData.length > 0 ? clientsData[0].total : 0
+    return { clientsData, total }
   }
 
   @Authorized(['root', 'buchhalter'])

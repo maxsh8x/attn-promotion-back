@@ -9,6 +9,14 @@ interface IGetAllParams {
   clients: number[]
 }
 
+interface IGetOneParams {
+  clientsOffset: number
+  clientsLimit: number
+  pageID: number
+  clients: number[]
+  role: string
+}
+
 interface IBindClientParams {
   page: number
   clients: number[]
@@ -35,19 +43,60 @@ export class PageRepository {
     )
   }
 
-  getOne(pageID: number, clients: number[], role: string): any {
-    const query: any = {
-      _id: pageID
-    }
-    const projection: any = {}
+  getPageClientsData(params: IGetOneParams): any {
+    const {
+      clientsOffset,
+      clientsLimit,
+      pageID,
+      clients,
+      role
+    } = params
+    const pipeline: any = [
+      { $match: { _id: pageID } },
+    ]
     if (clients.length > 0 || role === 'manager') {
-      query['meta.client'] = { $in: clients }
-      projection.meta = { $elemMatch: { client: { $in: clients } } }
+      pipeline.push(
+        {
+          $project: {
+            meta: {
+              $filter: {
+                input: '$meta',
+                as: 'meta',
+                cond: { $in: ['$$meta.client', clients] }
+              }
+            }
+          }
+        }
+      )
     }
+
+    pipeline.push(...[
+      { $project: { meta: 1, total: { $size: '$meta' } } },
+      { $unwind: '$meta' },
+      { $skip: clientsOffset },
+      { $limit: clientsLimit },
+      {
+        $lookup: {
+          from: 'clients',
+          localField: 'meta.client',
+          foreignField: '_id',
+          as: 'client'
+        }
+      },
+      {
+        $project: {
+          endDate: '$meta.endDate',
+          startDate: '$meta.startDate',
+          costPerClick: '$meta.costPerClick',
+          maxViews: '$meta.maxViews',
+          minViews: '$meta.minViews',
+          total: '$total',
+          client: { $arrayElemAt: ['$client', 0] }
+        }
+      }
+    ])
     return Page
-      .findOne(query, projection)
-      .populate('meta.client')
-      .lean()
+      .aggregate(pipeline)
       .exec()
   }
 
@@ -184,6 +233,7 @@ export class PageRepository {
     //   query.$text = { $search: filter }
     // }
 
+    // TODO: meta.client
     if (clients.length > 0 || role === 'manager') {
       query['meta.client'] = { $in: clients }
       projection.meta = { $elemMatch: { client: { $in: clients } } }
