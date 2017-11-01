@@ -84,7 +84,7 @@ export class MetricsController {
     @Body() params: UpdateMetricsParams
     ) {
     const { pageID, yDate } = params
-    const pageData = await this.pageRepository.getOne(pageID, [], 'root')
+    const pageData = await this.pageRepository.getOne(pageID)
     // TODO: to decorator
     if (pageData === null) {
       throw new NotFoundError('PageID not found')

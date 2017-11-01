@@ -9,7 +9,7 @@ interface IGetAllParams {
   clients: number[]
 }
 
-interface IGetOneParams {
+interface IGetPageClientsParams {
   clientsOffset: number
   clientsLimit: number
   pageID: number
@@ -43,7 +43,15 @@ export class PageRepository {
     )
   }
 
-  getPageClientsData(params: IGetOneParams): any {
+  getOne(pageID: number): any {
+    return Page
+      .findById(pageID)
+      .populate('meta.client')
+      .lean()
+      .exec()
+  }
+
+  getPageClientsData(params: IGetPageClientsParams): any {
     const {
       clientsOffset,
       clientsLimit,
