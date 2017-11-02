@@ -26,7 +26,7 @@ import {
   Matches
 } from 'class-validator'
 
-const patterUsername = /^[a-zA-Z0-9.]+$/
+const patterUsername = /^[a-z0-9.]+$/
 
 export class BasePaginationParams {
   @IsNumberString()
