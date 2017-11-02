@@ -27,6 +27,8 @@ yarn run start
 ```
 
 ## Deploy
+Add your own public key to server for user specified in ecosystem.config.js and run:
+
 ```pm2 deploy ecosystem.config.js production```
 
 ## Monitoring
