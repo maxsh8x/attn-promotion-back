@@ -60,9 +60,11 @@ export class CreateClientParams {
   @IsString()
   name: string
 
+  @IsOptional()
   @IsString()
   brand: string
 
+  @IsOptional()
   @Length(12, 12)
   @IsNumberString()
   vatin: string
