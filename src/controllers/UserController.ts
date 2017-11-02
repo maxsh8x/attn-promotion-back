@@ -20,11 +20,13 @@ import {
   MaxLength,
   IsEmail,
   IsIn,
-  IsAlphanumeric,
   IsString,
   IsPositive,
   IsNumberString,
+  Matches
 } from 'class-validator'
+
+const patterUsername = /^[a-zA-Z0-9.]+$/
 
 export class BasePaginationParams {
   @IsNumberString()
@@ -35,9 +37,7 @@ export class BasePaginationParams {
 }
 
 export class LoginParams {
-  @IsAlphanumeric()
-  @MinLength(5)
-  @MaxLength(15)
+  @Matches(patterUsername)
   username: string
 
   @MinLength(5)
