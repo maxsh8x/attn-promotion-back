@@ -1,5 +1,6 @@
 import { Service } from 'typedi'
 import { Page } from '../models/Page'
+import { QUESTION_VARIANT_TYPE } from '../constants'
 
 interface IGetAllParams {
   limit: number,
@@ -27,12 +28,13 @@ interface IBindClientParams {
   endDate: Date
 }
 
-interface IGetGroupQuestionsParams {
+interface IGetQuestionsParams {
   limit: number
   offset: number
   filter: string
   clients: number[]
   role: string
+  type: QUESTION_VARIANT_TYPE
 }
 
 @Service()
@@ -226,7 +228,7 @@ export class PageRepository {
     return Page.distinct('_id', { url: { $in: urls } })
   }
 
-  getGroupQuestions(params: IGetGroupQuestionsParams): any {
+  getQuestions(params: IGetQuestionsParams): any {
     const { filter, clients, role, limit, offset } = params
     const query: any = {
       type: 'group'

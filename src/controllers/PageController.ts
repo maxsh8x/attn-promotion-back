@@ -124,7 +124,7 @@ export class GetClientPagesParams extends BasePaginationParams {
   clientID: string
 }
 
-export class GetGroupQuestionParams extends BasePaginationParams {
+export class GetQuestionParams extends BasePaginationParams {
   @IsISO8601()
   startDate: string
 
@@ -331,9 +331,9 @@ export class PageController {
   }
 
   @Authorized(['root', 'buchhalter', 'manager'])
-  @Get('/v1/page/group-questions')
-  async groupQuestions(
-    @QueryParams() params: GetGroupQuestionParams,
+  @Get('/v1/page/questions')
+  async getQuestions(
+    @QueryParams() params: GetQuestionParams,
     @CurrentUser({ required: true }) user: any
     ) {
     const { userID, role } = user
@@ -343,10 +343,11 @@ export class PageController {
       const userData = await this.userRepository.getOne(userID)
       clients.push(...userData.clients)
     }
-    const [pageData, total] = await this.pageRepository.getGroupQuestions({
+    const [pageData, total] = await this.pageRepository.getQuestions({
       filter: '',
       offset: parseInt(offset, 10),
       limit: parseInt(limit, 10),
+      type: 'group',
       clients,
       role
     })
