@@ -34,7 +34,11 @@ import { ClientRepository } from '../repository/ClientRepository'
 import { UserRepository } from '../repository/UserRepository'
 import { getTitle, getStartURLPath } from '../utils/page'
 import { totalByPage } from '../utils/metrics'
-import { sources } from '../constants'
+import {
+  sources,
+  QUESTION_VARIANT_TYPE,
+  QUESTION_VARIANT_ARRAY
+} from '../constants'
 
 export class CreateGroupPageParams {
   @IsUrl()
@@ -130,6 +134,9 @@ export class GetQuestionParams extends BasePaginationParams {
 
   @IsISO8601()
   endDate: string
+
+  @IsIn(QUESTION_VARIANT_ARRAY)
+  type: QUESTION_VARIANT_TYPE
 }
 
 export class SearchPagesParams {
@@ -251,17 +258,6 @@ export class PageController {
     return { title }
   }
 
-  // @Authorized(['root', 'buchhalter'])
-  // @Get('/v1/page/count')
-  // async count(
-  //   @QueryParams() params: CountParams
-  //   ) {
-  //   const { active } = params
-  //   const isActive = (active === 'true')
-  //   const count = await this.pageRepository.count(isActive)
-  //   return count
-  // }
-
   @Authorized(['root', 'buchhalter'])
   @Get('/v1/page/')
   async getPages(
@@ -285,8 +281,6 @@ export class PageController {
       pages.map((item: any) => item._id),
       yDate
     )
-    // const activePages = await this.pageRepository.count(true)
-    // const inactivePages = await this.pageRepository.count(false)
     return {
       pages,
       input,
@@ -337,7 +331,7 @@ export class PageController {
     @CurrentUser({ required: true }) user: any
     ) {
     const { userID, role } = user
-    const { startDate, endDate, limit, offset } = params
+    const { startDate, endDate, limit, offset, type } = params
     const clients: any = []
     if (role === 'manager') {
       const userData = await this.userRepository.getOne(userID)
@@ -347,7 +341,7 @@ export class PageController {
       filter: '',
       offset: parseInt(offset, 10),
       limit: parseInt(limit, 10),
-      type: 'group',
+      type,
       clients,
       role
     })

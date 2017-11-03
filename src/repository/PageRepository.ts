@@ -229,9 +229,9 @@ export class PageRepository {
   }
 
   getQuestions(params: IGetQuestionsParams): any {
-    const { filter, clients, role, limit, offset } = params
+    const { filter, clients, role, limit, offset, type } = params
     const query: any = {
-      type: 'group'
+      type
     }
     const projection: any = {
       url: 1,
