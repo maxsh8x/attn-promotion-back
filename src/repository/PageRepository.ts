@@ -252,6 +252,8 @@ export class PageRepository {
     return Promise.all([
       Page
         .find(query, projection)
+        .skip(offset)
+        .limit(limit)
         .lean()
         .exec(),
       Page.count(query)
