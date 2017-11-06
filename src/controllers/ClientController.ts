@@ -46,7 +46,14 @@ export class GetClientsParams extends PaginationParams {
   user: string
 }
 
-export class GetPageClientsParams extends PaginationParams {
+export class GetPageClientsParams {
+  // https://github.com/pleerock/class-validator/pull/118
+  @IsOptional()
+  limit: string
+
+  @IsOptional()
+  offset: string
+
   @IsNumberString()
   pageID: string
 }

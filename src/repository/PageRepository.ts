@@ -62,7 +62,7 @@ export class PageRepository {
       role
     } = params
     const pipeline: any = [
-      { $match: { _id: pageID } },
+      { $match: { _id: pageID } }
     ]
     if (clients.length > 0 || role === 'manager') {
       pipeline.push(
@@ -82,9 +82,17 @@ export class PageRepository {
 
     pipeline.push(...[
       { $project: { meta: 1, total: { $size: '$meta' } } },
-      { $unwind: '$meta' },
-      { $skip: clientsOffset },
-      { $limit: clientsLimit },
+      { $unwind: '$meta' }
+    ])
+
+    if (!([clientsLimit, clientsOffset]).every(item => isNaN(item))) {
+      pipeline.push(...[
+        { $skip: clientsOffset },
+        { $limit: clientsLimit }
+      ])
+    }
+
+    pipeline.push(...[
       {
         $lookup: {
           from: 'clients',
