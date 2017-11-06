@@ -102,6 +102,19 @@ export class PageRepository {
         }
       },
       {
+        $graphLookup: {
+          from: 'metrics',
+          startWith: '$_id',
+          connectFromField: 'page',
+          connectToField: 'page',
+          as: 'metrics',
+          restrictSearchWithMatch: {
+            type: 'total'
+          }
+        }
+      },
+
+      {
         $project: {
           endDate: '$meta.endDate',
           startDate: '$meta.startDate',
@@ -109,7 +122,25 @@ export class PageRepository {
           maxViews: '$meta.maxViews',
           minViews: '$meta.minViews',
           total: '$total',
-          client: { $arrayElemAt: ['$client', 0] }
+          client: { $arrayElemAt: ['$client', 0] },
+          views: {
+            $reduce: {
+              input: {
+                $filter: {
+                  input: '$metrics',
+                  as: 'item',
+                  cond: {
+                    $and: [
+                      { $gte: ['$$item.date', '$meta.startDate'] },
+                      { $lte: ['$$item.date', '$meta.endDate'] }
+                    ]
+                  }
+                }
+              },
+              initialValue: 0,
+              in: { $add: ['$$value', '$$this.pageviews'] }
+            }
+          }
         }
       }
     ])
