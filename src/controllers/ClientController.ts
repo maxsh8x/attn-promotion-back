@@ -199,7 +199,7 @@ export class ClientController {
     const data = await this.clientRepository.search(filter, 5)
     const result = data.map((item: any) => ({
       value: item._id,
-      text: item.name
+      text: [item.name, item.brand].join(' - ')
     }))
     return result
   }

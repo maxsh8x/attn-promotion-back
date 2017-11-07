@@ -62,7 +62,7 @@ export class ClientRepository {
       ? { $text: { $search: filter } }
       : {}
     return Client
-      .find(query, '_id name')
+      .find(query, '_id name brand')
       .limit(limit)
       .lean()
       .exec()

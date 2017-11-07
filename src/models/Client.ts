@@ -27,7 +27,9 @@ Data.plugin(AutoIncrement, {
 })
 
 Data.index({
-  name: 'text'
+  name: 'text',
+  brand: 'text',
+  vatin: 'text'
 })
 
 export const Client = mongoose.model<IData & mongoose.Document>('Client', Data)
