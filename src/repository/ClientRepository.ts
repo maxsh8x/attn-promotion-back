@@ -57,10 +57,37 @@ export class ClientRepository {
     ])
   }
 
-  search(filter: string, limit: number): any {
+  searchFulltext(filter: string, limit: number): any {
+    // name:{'$regex' : '^string$', '$options' : 'i'}}
     const query = filter
       ? { $text: { $search: filter } }
       : {}
+    return Client
+      .find(query,
+      {
+        _id: 1,
+        name: 1,
+        brand: 1,
+        score: { $meta: 'textScore' }
+      })
+      .sort({ score: { $meta: 'textScore' } })
+      .limit(limit)
+      .lean()
+      .exec()
+  }
+
+  searchPattern(filter: string, limit: number, exclude: number[]): any {
+    const query: any = filter
+      ? {
+        $or: [
+          { name: new RegExp(filter, 'i') },
+          { brand: new RegExp(filter, 'i') }
+        ]
+      }
+      : {}
+    if (exclude.length > 0) {
+      query._id = { $nin: exclude }
+    }
     return Client
       .find(query, '_id name brand')
       .limit(limit)

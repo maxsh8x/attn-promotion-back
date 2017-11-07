@@ -196,7 +196,14 @@ export class ClientController {
     @QueryParams() params: SearchClientsParams
     ) {
     const { filter } = params
-    const data = await this.clientRepository.search(filter, 5)
+    const limit = 5
+    const data = await this.clientRepository.searchFulltext(filter, limit)
+    const headLimit = limit - data.length
+    if (headLimit > 0) {
+      const exclude = data.map((item: any) => item._id)
+      const dataPattern = await this.clientRepository.searchPattern(filter, headLimit, exclude)
+      data.unshift(...dataPattern)
+    }
     const result = data.map((item: any) => ({
       value: item._id,
       text: [item.name, item.brand].join(' - ')
