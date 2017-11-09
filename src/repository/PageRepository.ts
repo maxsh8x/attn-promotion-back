@@ -158,8 +158,26 @@ export class PageRepository {
   }
 
   getClientsPagesData(params: IGetClientsPages) {
-    const { offset, limit, startDate, endDate, clientID, type } = params
-    const fields = { url: 1, title: 1, type: 1, _id: 1 }
+    const {
+      offset,
+      limit,
+      startDate,
+      endDate,
+      clientID,
+      type
+    } = params
+
+    const fields = [
+      'url',
+      'title',
+      'type',
+      '_id',
+      'active'
+    ].reduce(
+      (p: any, c) => {
+        p[c] = 1
+        return p
+      }, {})
 
     const queryCount: any = { 'meta.client': clientID }
     const pipeline: any = [
@@ -168,7 +186,7 @@ export class PageRepository {
 
     if (type !== 'all') {
       pipeline[0].$match.type = type
-      queryCount.type = type;
+      queryCount.type = type
     }
 
     if (!([offset, limit]).every(item => isNaN(item))) {
@@ -209,6 +227,10 @@ export class PageRepository {
         $project: {
           ...fields,
           costPerClick: '$meta.costPerClick',
+          minViews: '$meta.minViews',
+          maxViews: '$meta.maxViews',
+          startDate: '$meta.startDate',
+          endDate: '$meta.endDate',
           views: {
             $reduce: {
               input: {
@@ -315,25 +337,6 @@ export class PageRepository {
       .aggregate(pipeline)
       .exec()
   }
-
-  // getByClient(client: number, limit: number, offset: number): any {
-  //   const query: any = { 'meta.client': client }
-  //   return Promise.all([
-  //     Page
-  //       .find(query,
-  //       {
-  //         url: 1,
-  //         title: 1,
-  //         type: 1,
-  //         active: 1,
-  //         meta: { $elemMatch: { client } }
-  //       }
-  //       )
-  //       .lean()
-  //       .exec(),
-  //     Page.count(query)
-  //   ])
-  // }
 
   getAll(params: IGetAllParams): any {
     const { limit, offset, active, filter, clients } = params
