@@ -18,6 +18,15 @@ interface IGetPageClientsParams {
   role: string
 }
 
+interface IGetClientsPages {
+  offset: number
+  limit: number
+  clientID: number
+  startDate: Date
+  endDate: Date
+  type: 'all' | 'group' | 'individual'
+}
+
 interface IBindClientParams {
   page: number
   clients: number[]
@@ -113,7 +122,6 @@ export class PageRepository {
           }
         }
       },
-
       {
         $project: {
           endDate: '$meta.endDate',
@@ -147,6 +155,106 @@ export class PageRepository {
     return Page
       .aggregate(pipeline)
       .exec()
+  }
+
+  getClientsPagesData(params: IGetClientsPages) {
+    const { offset, limit, startDate, endDate, clientID, type } = params
+    const fields = { url: 1, title: 1, type: 1, _id: 1 }
+
+    const queryCount: any = { 'meta.client': clientID }
+    const pipeline: any = [
+      { $match: { 'meta.client': clientID } }
+    ]
+
+    if (type !== 'all') {
+      pipeline[0].$match.type = type
+      queryCount.type = type;
+    }
+
+    if (!([offset, limit]).every(item => isNaN(item))) {
+      pipeline.push(...[
+        { $skip: offset },
+        { $limit: limit }
+      ])
+    }
+
+    pipeline.push(...[
+      {
+        $project: {
+          ...fields,
+          meta: {
+            $arrayElemAt: [{
+              $filter: {
+                input: '$meta',
+                as: 'item',
+                cond: { $eq: ['$$item.client', clientID] }
+              }
+            }, 0]
+          }
+        }
+      },
+      {
+        $graphLookup: {
+          from: 'metrics',
+          startWith: '$_id',
+          connectFromField: 'page',
+          connectToField: 'page',
+          as: 'metrics',
+          restrictSearchWithMatch: {
+            type: 'total'
+          }
+        }
+      },
+      {
+        $project: {
+          ...fields,
+          costPerClick: '$meta.costPerClick',
+          views: {
+            $reduce: {
+              input: {
+                $filter: {
+                  input: '$metrics',
+                  as: 'item',
+                  cond: {
+                    $and: [
+                      { $gte: ['$$item.date', '$meta.startDate'] },
+                      { $lte: ['$$item.date', '$meta.endDate'] }
+                    ]
+                  }
+                }
+              },
+              initialValue: 0,
+              in: { $add: ['$$value', '$$this.pageviews'] }
+            }
+          },
+          viewsPeriod: {
+            $reduce: {
+              input: {
+                $filter: {
+                  input: '$metrics',
+                  as: 'item',
+                  cond: {
+                    $and: [
+                      { $gte: ['$$item.date', startDate] },
+                      { $lte: ['$$item.date', endDate] }
+                    ]
+                  }
+                }
+              },
+              initialValue: 0,
+              in: { $add: ['$$value', '$$this.pageviews'] }
+            }
+          }
+        }
+      }
+    ])
+
+    return Promise.all([
+      Page
+        .aggregate(pipeline)
+        .exec(),
+      Page.count(queryCount)
+    ])
   }
 
   getPageClients(pageID: number) {
@@ -208,24 +316,24 @@ export class PageRepository {
       .exec()
   }
 
-  getByClient(client: number, limit: number, offset: number): any {
-    const query: any = { 'meta.client': client }
-    return Promise.all([
-      Page
-        .find(query,
-        {
-          url: 1,
-          title: 1,
-          type: 1,
-          active: 1,
-          meta: { $elemMatch: { client } }
-        }
-        )
-        .lean()
-        .exec(),
-      Page.count(query)
-    ])
-  }
+  // getByClient(client: number, limit: number, offset: number): any {
+  //   const query: any = { 'meta.client': client }
+  //   return Promise.all([
+  //     Page
+  //       .find(query,
+  //       {
+  //         url: 1,
+  //         title: 1,
+  //         type: 1,
+  //         active: 1,
+  //         meta: { $elemMatch: { client } }
+  //       }
+  //       )
+  //       .lean()
+  //       .exec(),
+  //     Page.count(query)
+  //   ])
+  // }
 
   getAll(params: IGetAllParams): any {
     const { limit, offset, active, filter, clients } = params
@@ -252,15 +360,6 @@ export class PageRepository {
       .find({ active: true }, '_id url')
       .lean()
       .exec()
-  }
-
-  getIndividualRelatedClients(): any {
-    return Page.
-      find({
-        active: true,
-        type: { $in: ['individual', 'related'] }
-      })
-      .cursor()
   }
 
   getPagesByURLs(urls: string[]): any {

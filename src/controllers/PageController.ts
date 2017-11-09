@@ -24,7 +24,8 @@ import {
   Min,
   IsISO8601,
   ValidateIf,
-  ArrayUnique
+  ArrayUnique,
+  IsOptional
 } from 'class-validator'
 
 import { PageRepository } from '../repository/PageRepository'
@@ -117,7 +118,13 @@ export class GetPagesParams extends BasePaginationParams {
   clients: string
 }
 
-export class GetClientPagesParams extends BasePaginationParams {
+export class GetClientPagesParams {
+  @IsOptional()
+  offset: string
+
+  @IsOptional()
+  limit: string
+
   @IsISO8601()
   startDate: string
 
@@ -126,6 +133,9 @@ export class GetClientPagesParams extends BasePaginationParams {
 
   @IsNumberString()
   clientID: string
+
+  @IsIn(['all', 'group', 'individual'])
+  type: 'all' | 'group' | 'individual'
 }
 
 export class GetQuestionParams extends BasePaginationParams {
@@ -295,22 +305,16 @@ export class PageController {
   async getClientPages(
     @QueryParams() params: GetClientPagesParams
     ) {
-    const { clientID, startDate, endDate, limit, offset } = params
-    const [pagesData, total] = await this.pageRepository.getByClient(
-      parseInt(clientID, 10),
-      parseInt(limit, 10),
-      parseInt(offset, 10)
-    )
-    const pages = pagesData.map((page: any) => page._id)
-    const metricsData = await this.metricsRepository.getTotalByPage(
-      new Date(startDate),
-      new Date(endDate),
-      pages
-    )
-    const metricsMap = totalByPage(metricsData)
-    for (let i = 0; i < pagesData.length; i++) {
-      pagesData[i].views = metricsMap[pagesData[i]._id] || 0
-    }
+    const { clientID, startDate, endDate, limit, offset, type } = params
+    const [pagesData, total] = await this.pageRepository.getClientsPagesData({
+      clientID: parseInt(clientID, 10),
+      offset: parseInt(offset, 10),
+      limit: parseInt(limit, 10),
+      startDate: new Date(startDate),
+      endDate: new Date(endDate),
+      type
+    })
+    // TODO: check it manager clientID
     return { pagesData, total }
   }
 
