@@ -9,6 +9,21 @@ interface IGetAll {
   role: string
 }
 
+interface ISearchFulltext {
+  filter: string
+  limit: number
+  clients: number[]
+  role: string
+}
+
+interface ISearchPattern {
+  filter: string
+  limit: number
+  exclude: number[]
+  clients: number[]
+  role: string
+}
+
 @Service()
 export class ClientRepository {
   create(params: any): any {
@@ -57,11 +72,18 @@ export class ClientRepository {
     ])
   }
 
-  searchFulltext(filter: string, limit: number): any {
-    // name:{'$regex' : '^string$', '$options' : 'i'}}
-    const query = filter
+
+
+  searchFulltext(params: ISearchFulltext): any {
+    const { filter, limit, role, clients } = params
+    const query: any = filter
       ? { $text: { $search: filter } }
       : {}
+
+    if (clients.length > 0 || role === 'manager') {
+      query._id = { $in: clients }
+    }
+
     return Client
       .find(query,
       {
@@ -76,18 +98,27 @@ export class ClientRepository {
       .exec()
   }
 
-  searchPattern(filter: string, limit: number, exclude: number[]): any {
-    const query: any = filter
-      ? {
-        $or: [
-          { name: new RegExp(filter, 'i') },
-          { brand: new RegExp(filter, 'i') }
-        ]
-      }
-      : {}
-    if (exclude.length > 0) {
-      query._id = { $nin: exclude }
+  searchPattern(params: ISearchPattern): any {
+    const { filter, exclude, clients, limit, role } = params
+    const query: any = {
+      $and: [
+        {
+          $or: [
+            { name: new RegExp(filter, 'i') },
+            { brand: new RegExp(filter, 'i') }
+          ]
+        }
+      ]
     }
+
+    if (exclude.length > 0) {
+      query.$and.push({ _id: { $nin: exclude } })
+    }
+
+    if (clients.length > 0 || role === 'manager') {
+      query.$and.push({ _id: { $in: clients } })
+    }
+
     return Client
       .find(query, '_id name brand')
       .limit(limit)

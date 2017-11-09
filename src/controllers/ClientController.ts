@@ -197,18 +197,36 @@ export class ClientController {
     return { clientsData, total }
   }
 
-  @Authorized(['root', 'buchhalter'])
+  @Authorized(['root', 'buchhalter', 'manager'])
   @Get('/v1/client/search')
   async searchClients(
-    @QueryParams() params: SearchClientsParams
+    @QueryParams() params: SearchClientsParams,
+    @CurrentUser({ required: true }) user: any
     ) {
+    const { userID, role } = user
+    const clients: any[] = []
+    if (role === 'manager') {
+      const userData = await this.userRepository.getOne(userID)
+      clients.push(...userData.clients)
+    }
     const { filter } = params
     const limit = 5
-    const data = await this.clientRepository.searchFulltext(filter, limit)
+    const data = await this.clientRepository.searchFulltext({
+      filter,
+      limit,
+      clients,
+      role
+    })
     const headLimit = limit - data.length
     if (headLimit > 0) {
       const exclude = data.map((item: any) => item._id)
-      const dataPattern = await this.clientRepository.searchPattern(filter, headLimit, exclude)
+      const dataPattern = await this.clientRepository.searchPattern({
+        limit: headLimit,
+        exclude,
+        filter,
+        clients,
+        role
+      })
       data.unshift(...dataPattern)
     }
     const result = data.map((item: any) => ({
