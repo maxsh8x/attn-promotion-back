@@ -17,7 +17,8 @@ import {
   Min,
   IsISO8601,
   IsPositive,
-  IsOptional
+  IsOptional,
+  IsIn
 } from 'class-validator'
 import { ClientRepository } from '../repository/ClientRepository'
 import { PageRepository } from '../repository/PageRepository'
@@ -33,6 +34,9 @@ export class PaginationParams {
 }
 
 export class GetClientsParams extends PaginationParams {
+  @IsIn(['all', 'group', 'individual'])
+  type: 'all' | 'group' | 'individual'
+
   @IsString()
   filter: string
 
@@ -117,7 +121,7 @@ export class ClientController {
     @CurrentUser({ required: true }) userData: any
     ) {
     const { userID, role } = userData
-    const { filter, startDate, endDate, user, limit, offset } = params
+    const { filter, startDate, endDate, user, limit, offset, type } = params
     const clients: number[] = []
     if (role === 'manager') {
       const userData = await this.userRepository.getOne(userID)
@@ -129,7 +133,7 @@ export class ClientController {
         return {
           clientsData: [],
           views: {},
-          costPerClick: {},
+          cost: {},
           total: 0
         }
       } else {
@@ -144,22 +148,25 @@ export class ClientController {
       role
     })
     const totalData = await this.pageRepository.getClientsTotal(
-      new Date(startDate),
-      new Date(endDate),
-      clientsData.map((client: any) => client._id)
+      {
+        startDate: new Date(startDate),
+        endDate: new Date(endDate),
+        clients: clientsData.map((client: any) => client._id),
+        type
+      }
     )
     const viewsDataMap: any = {}
-    const costPerClickDataMap: any = {}
+    const costMap: any = {}
     for (let i = 0; i < totalData.length; i += 1) {
       viewsDataMap[totalData[i]._id] = totalData[i].views
-      costPerClickDataMap[totalData[i]._id] = totalData[i].costPerClick
+      costMap[totalData[i]._id] = totalData[i].cost
     }
     for (let i = 0; i < clientsData.length; i += 1) {
-      clientsData[i].views = viewsDataMap[clientsData[i]._id]
-      clientsData[i].costPerClick = costPerClickDataMap[clientsData[i]._id]
+      clientsData[i].views = viewsDataMap[clientsData[i]._id] || 0
+      clientsData[i].cost = costMap[clientsData[i]._id] || 0
     }
     return {
-      costPerClick: costPerClickDataMap,
+      cost: costMap,
       views: viewsDataMap,
       clientsData,
       total

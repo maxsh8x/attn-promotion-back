@@ -18,13 +18,22 @@ interface IGetPageClientsParams {
   role: string
 }
 
+type types = 'all' | 'group' | 'individual'
+
 interface IGetClientsPages {
   offset: number
   limit: number
   clientID: number
   startDate: Date
   endDate: Date
-  type: 'all' | 'group' | 'individual'
+  type: types
+}
+
+interface IGetClientsTotal {
+  startDate: Date
+  endDate: Date
+  clients: number[]
+  type: types
 }
 
 interface IBindClientParams {
@@ -284,9 +293,10 @@ export class PageRepository {
       .distinct('meta.client', { _id: pageID })
   }
 
-  // check match projection
-  getClientsTotal(startDate: Date, endDate: Date, clients: number[]) {
-    const pipeline = [
+
+  getClientsTotal(params: IGetClientsTotal) {
+    const { startDate, endDate, clients, type } = params
+    const pipeline: any[] = [
       {
         $match: {
           'meta.client': { $in: clients }
@@ -328,11 +338,16 @@ export class PageRepository {
       {
         $group: {
           _id: '$_id',
-          costPerClick: { $sum: '$costPerClick' },
+          cost: { $sum: {$multiply: ['$costPerClick', '$views'] } },
           views: { $sum: '$views' }
         }
       }
     ]
+
+    if (type !== 'all') {
+      pipeline[0].$match.type = type
+    }
+
     return Page
       .aggregate(pipeline)
       .exec()
