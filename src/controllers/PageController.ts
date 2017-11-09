@@ -389,12 +389,18 @@ export class PageController {
   }
 
   @HttpCode(204)
-  @Authorized(['root'])
+  @Authorized(['root', 'manager'])
   @Post('/v1/page/bind')
   async bindClients(
     @Body() params: BindClientsParams
     ) {
     const { page, clients, minViews, maxViews, costPerClick, startDate, endDate } = params
+
+    const bindPage = await this.pageRepository.getBindPage(page, clients)
+    if (!(bindPage)) {
+      throw new BadRequestError('INVALID_PAGE')
+    }
+
     await this.pageRepository.bindClients({
       page,
       clients,

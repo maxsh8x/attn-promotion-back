@@ -338,7 +338,7 @@ export class PageRepository {
       {
         $group: {
           _id: '$_id',
-          cost: { $sum: {$multiply: ['$costPerClick', '$views'] } },
+          cost: { $sum: { $multiply: ['$costPerClick', '$views'] } },
           views: { $sum: '$views' }
         }
       }
@@ -430,6 +430,13 @@ export class PageRepository {
       .limit(limit)
       .lean()
       .exec()
+  }
+
+  getBindPage(page: number, clients: number[]) {
+    return Page.findOne({
+      _id: page,
+      'meta.client': { $nin: clients }
+    })
   }
 
   bindClients(params: IBindClientParams): any {
