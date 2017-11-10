@@ -4,6 +4,8 @@ import axios from '../utils/fetcher'
 import { allSources } from '../constants'
 import { CHART_INTERVAL_TYPE } from '../constants'
 import { getCostPipeline } from '../utils/metrics'
+import { PageRepository } from '../repository/PageRepository'
+import { ClientRepository } from '../repository/ClientRepository'
 
 export class DataItem {
   [name: string]: Array<number>
@@ -30,6 +32,11 @@ interface IGetYMetrics {
 
 @Service()
 export class MetricsRepository {
+  constructor(
+    private pageRepository: PageRepository,
+    private clientRepository: ClientRepository
+  ) { }
+
   async isValidCounterID(counterID: number) {
     try {
       await axios().get('', {
@@ -41,6 +48,24 @@ export class MetricsRepository {
       return true
     } catch (e) {
       return false
+    }
+  }
+
+  async updateMetrics(pageID: number, startDate: string, endDate: string) {
+    const pageData = await this.pageRepository.getOne(pageID)
+    console.log('page_date', pageData)
+    const { url, type } = pageData
+    let counterID: number | null = null
+    if (type === 'group') {
+      counterID = pageData.counterID
+    } else {
+      const clientData = await this.clientRepository.getOne(pageData.meta[0].client)
+      counterID = clientData.counterID
+    }
+    const data = await this.getYMetricsByDay(url, pageID, counterID, startDate, endDate)
+    console.log('lol', data)
+    if (data.length > 0) {
+      await this.createMetrics(data)
     }
   }
 

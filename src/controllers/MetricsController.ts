@@ -5,7 +5,6 @@ import {
   Body,
   JsonController,
   Authorized,
-  NotFoundError,
   HttpCode,
   QueryParams
 } from 'routing-controllers'
@@ -87,26 +86,7 @@ export class MetricsController {
     @Body() params: UpdateMetricsParams
     ) {
     const { pageID, startDate, endDate } = params
-    const pageData = await this.pageRepository.getOne(pageID)
-    // TODO: to decorator
-    if (pageData === null) {
-      throw new NotFoundError('PageID not found')
-    }
-    const { url, type } = pageData
-    let counterID: number | null = null
-    if (type === 'group') {
-      counterID = pageData.counterID
-    } else {
-      const clientData = await this.clientRepository.getOne(pageData.meta[0].client)
-      counterID = clientData.counterID
-    }
-    const data = await this.metricsRepository.getYMetricsByDay(url, pageID, counterID, startDate, endDate)
-    if (data.length > 0) {
-      try {
-        await this.metricsRepository.createMetrics(data)
-      } catch (e) { }
-    }
-    // TODO: issue
+    await this.metricsRepository.updateMetrics(pageID, startDate, endDate)
     return ''
   }
 

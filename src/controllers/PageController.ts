@@ -188,7 +188,7 @@ export class PageController {
     if (!isValidCID) {
       throw new BadRequestError('INVALID_COUNTER_ID')
     }
-    const data = await this.pageRepository.create(
+    await this.pageRepository.create(
       {
         url,
         title,
@@ -196,19 +196,7 @@ export class PageController {
         type: 'group'
       }
     )
-    const { _id: pageID } = data
-    const metricsData = await this.metricsRepository.getYMetrics(url, counterID)
-    if (Object.keys(metricsData.data).length > 0) {
-      try {
-        await this.metricsRepository.createMetrics([{
-          ...metricsData,
-          pageID
-        }])
-      } catch (e) {
-        // TODO: sentry
-      }
-    }
-    return { pageID }
+    return ''
   }
 
   @Authorized(['root'])
@@ -244,18 +232,7 @@ export class PageController {
       }]
     })
     const { _id: pageID } = pageData
-    const { counterID } = await this.clientRepository.getOne(client)
-    const metricsData = await this.metricsRepository.getYMetrics(url, counterID)
-    if (Object.keys(metricsData.data).length > 0) {
-      try {
-        await this.metricsRepository.createMetrics([{
-          ...metricsData,
-          pageID
-        }])
-      } catch (e) {
-        // TODO: sentry
-      }
-    }
+    await this.metricsRepository.updateMetrics(pageID, startDate, endDate)
     return { pageID }
   }
 
@@ -268,6 +245,7 @@ export class PageController {
     return { title }
   }
 
+  @HttpCode(204)
   @Authorized(['root', 'buchhalter'])
   @Get('/v1/page/')
   async getPages(
@@ -410,6 +388,7 @@ export class PageController {
       startDate: new Date(startDate),
       endDate: new Date(endDate)
     })
+    await this.metricsRepository.updateMetrics(page, startDate, endDate)
     // TODO: issue
     return ''
   }
