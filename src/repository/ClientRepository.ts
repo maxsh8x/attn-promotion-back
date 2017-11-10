@@ -46,9 +46,11 @@ export class ClientRepository {
       .exec()
   }
 
-  convertIDtoName(clientIDs: number[]): any {
+  getClientsLabels(clientIDs: number[]): any {
     return Client
-      .distinct('name', { _id: { $in: clientIDs } })
+      .find({ _id: { $in: clientIDs } }, '-_id name brand')
+      .lean()
+      .exec()
   }
 
   getAll(params: IGetAll): any {

@@ -302,8 +302,8 @@ export class PageController {
     @QueryParam('pageID') pageID: number
     ) {
     const clientsIDs = await this.pageRepository.getPageClients(pageID)
-    const clientsNames = await this.clientRepository.convertIDtoName(clientsIDs)
-    return clientsNames
+    const clientsNames = await this.clientRepository.getClientsLabels(clientsIDs)
+    return clientsNames.map((item: any) => `${item.name} - ${item.brand}`)
   }
 
   @Authorized(['root', 'buchhalter', 'manager'])
