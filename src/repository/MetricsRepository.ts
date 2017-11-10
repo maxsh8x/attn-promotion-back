@@ -53,7 +53,6 @@ export class MetricsRepository {
 
   async updateMetrics(pageID: number, startDate: string, endDate: string) {
     const pageData = await this.pageRepository.getOne(pageID)
-    console.log('page_date', pageData)
     const { url, type } = pageData
     let counterID: number | null = null
     if (type === 'group') {
@@ -63,7 +62,6 @@ export class MetricsRepository {
       counterID = clientData.counterID
     }
     const data = await this.getYMetricsByDay(url, pageID, counterID, startDate, endDate)
-    console.log('lol', data)
     if (data.length > 0) {
       await this.createMetrics(data)
     }
