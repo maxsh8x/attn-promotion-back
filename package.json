@@ -28,7 +28,7 @@
     "@types/ioredis": "^0.0.25",
     "@types/jsonwebtoken": "^7.2.3",
     "@types/lru-cache": "^4.1.0",
-    "@types/mongoose": "^4.7.23",
+    "@types/mongoose": "^4.7.25",
     "agenda": "^1.0.0",
     "axios": "^0.16.2",
     "body-parser": "^1.18.2",

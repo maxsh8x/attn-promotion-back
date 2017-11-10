@@ -1,6 +1,5 @@
 import * as mongoose from 'mongoose'
 // TODO: fix old @types
-const AutoIncrement = require('mongoose-sequence')(mongoose)
 
 interface IData extends mongoose.Document {
   _id: number
@@ -26,14 +25,10 @@ const Data = new mongoose.Schema(
   },
   {
     _id: false,
-    timestamps: true,
-    minimize: true
+    timestamps: false,
+    versionKey: false
   }
 )
-
-Data.plugin(AutoIncrement, {
-  id: 'metrics_seq'
-})
 
 Data.index(
   { 'type': 1, 'page': 1, 'date': 1 },

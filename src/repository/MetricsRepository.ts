@@ -21,6 +21,13 @@ interface IGetCostChartParams {
   pageID: number
 }
 
+interface IGetYMetrics {
+  startURLPath: string,
+  counterID: number
+  startDate: Date
+  endDate: Date
+}
+
 @Service()
 export class MetricsRepository {
   async isValidCounterID(counterID: number) {
@@ -37,71 +44,93 @@ export class MetricsRepository {
     }
   }
 
-  async getYMetrics(startURLPath: string, counterID: number, yDate = 'yesterday') {
+  async getYMetricsByDay(
+    startURLPath: string,
+    page: number,
+    counterID: number,
+    startDate: string,
+    endDate: string
+  ) {
     const basicParams = {
       ids: counterID,
-      date1: yDate,
-      date2: yDate,
+      date1: startDate,
+      date2: endDate,
       filters: `ym:s:startURLPath=='${startURLPath}'`,
-      metrics: 'ym:s:pageviews,ym:s:pageDepth,ym:s:avgVisitDurationSeconds,ym:s:bounceRate'
+      metrics: 'ym:s:pageviews,ym:s:pageDepth,ym:s:avgVisitDurationSeconds,ym:s:bounceRate',
+      dimensions: 'ym:s:datePeriod<group>Name',
+      group: 'day'
     }
+
     const networks = {
       ...basicParams,
-      dimensions: 'ym:s:UTMSource,ym:s:startURLPath'
+      dimensions: [
+        'ym:s:UTMSource',
+        'ym:s:startURLPath',
+        basicParams.dimensions
+      ].join(',')
     }
+
     const meta = {
       ...basicParams,
-      dimensions: 'ym:s:<attribution>TrafficSource'
+      dimensions: [
+        'ym:s:<attribution>TrafficSource',
+        basicParams.dimensions
+      ].join(',')
     }
-    // TODO: 404 if counterID not found
-    const { data: networksData } = await axios().get('', { params: networks })
+
+    const { data: networksData } = await axios().get('', {
+      params: networks
+    })
     const { data: metaData } = await axios().get('', { params: meta })
     const { data: total } = await axios().get('', { params: basicParams })
 
-    const date = Date.parse(networksData.query.date1)
-    const data: any = {}
+    const result: any = []
 
-    const extractData = ([dataSource, fieldName]: [any, string]) =>
-      dataSource.data.forEach((item: any) => {
-        if (fieldName !== 'total') {
-          const sourceName = item.dimensions[0][fieldName]
-          if (allSources.indexOf(sourceName) !== -1) {
-            data[sourceName] = item.metrics
-          }
-        } else {
-          data['total'] = item.metrics
+    const extractData = (
+      [dataSource, datePosition, fieldName, fieldPosition]: [
+        any,
+        number,
+        string,
+        number | null
+      ]
+    ) => {
+      for (let i = 0; i < dataSource.data.length; i += 1) {
+        const type = fieldName !== 'total'
+          ? dataSource.data[i].dimensions[fieldPosition][fieldName]
+          : fieldName
+        if (fieldName !== 'total' && allSources.indexOf(type) === -1) {
+          continue
         }
-      })
-
-    const sourcesData = [
-      [networksData, 'name'],
-      [metaData, 'id'],
-      [total, 'total']
-    ]
-
-    sourcesData.forEach(extractData)
-
-    return { date, data }
-  }
-
-  createMetrics(items: any[]): any {
-    const docs = []
-    for (let i = 0; i < items.length; i++) {
-      const keys = Object.keys(items[i].data)
-      for (let x = 0; x < keys.length; x++) {
-        const sourceMetrics = items[i].data[keys[x]]
-        docs.push({
-          date: items[i].date,
-          page: items[i].pageID,
-          pageviews: sourceMetrics[0],
-          pageDepth: sourceMetrics[1],
-          avgVisitDurationSeconds: sourceMetrics[2],
-          bounceRate: sourceMetrics[3],
-          type: keys[x]
+        result.push({
+          date: dataSource.data[i].dimensions[datePosition].name,
+          avgVisitDurationSeconds: dataSource.data[i].metrics[2],
+          bounceRate: dataSource.data[i].metrics[3],
+          pageDepth: dataSource.data[i].metrics[1],
+          pageviews: dataSource.data[i].metrics[0],
+          type,
+          page
         })
       }
     }
-    return Metrics.insertMany(docs, { ordered: false })
+
+    const sourcesData = [
+      [networksData, 2, 'name', 0],
+      [metaData, 1, 'id', 0],
+      [total, 0, 'total', null]
+    ]
+
+    sourcesData.forEach(extractData)
+    return result
+  }
+
+  createMetrics(items: any[]): any {
+    return (Metrics as any).bulkWrite(items.map(item => ({
+      replaceOne: {
+        filter: { type: item.type, page: item.page, date: item.date },
+        replacement: item,
+        upsert: true
+      }
+    })))
   }
 
   getMetrics(yDate: string, pageID: number): any {

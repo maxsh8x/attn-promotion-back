@@ -14,7 +14,8 @@ import {
   IsUrl,
   IsISO8601,
   IsNumberString,
-  IsIn
+  IsIn,
+  ValidateIf
 } from 'class-validator'
 
 import { MetricsRepository } from '../repository/MetricsRepository'
@@ -29,7 +30,10 @@ export class UpdateMetricsParams {
   pageID: number
 
   @IsISO8601()
-  yDate: string
+  startDate: string
+
+  @IsISO8601()
+  endDate: string
 }
 
 export class GetMetricsParams {
@@ -83,7 +87,7 @@ export class MetricsController {
   async updateMetrics(
     @Body() params: UpdateMetricsParams
     ) {
-    const { pageID, yDate } = params
+    const { pageID, startDate, endDate } = params
     const pageData = await this.pageRepository.getOne(pageID)
     // TODO: to decorator
     if (pageData === null) {
@@ -97,13 +101,10 @@ export class MetricsController {
       const clientData = await this.clientRepository.getOne(pageData.meta[0].client)
       counterID = clientData.counterID
     }
-    const data = await this.metricsRepository.getYMetrics(url, counterID, yDate)
-    if (Object.keys(data.data).length > 0) {
+    const data = await this.metricsRepository.getYMetricsByDay(url, pageID, counterID, startDate, endDate)
+    if (data.length > 0) {
       try {
-        await this.metricsRepository.createMetrics([{
-          ...data,
-          pageID
-        }])
+        await this.metricsRepository.createMetrics(data)
       } catch (e) { }
     }
     // TODO: issue
