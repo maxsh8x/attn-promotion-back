@@ -1,11 +1,11 @@
 import 'reflect-metadata'
 import * as mongoose from 'mongoose'
 import * as bluebird from 'bluebird'
-import * as Agenda from 'agenda'
+// import * as Agenda from 'agenda'
 import { createExpressServer, useContainer } from 'routing-controllers'
 import { Container } from 'typedi'
 import { getAppConfig, validateConfig } from './utils/config'
-import { task } from './utils/task'
+// import { task } from './utils/task'
 import { authorizationChecker, currentUserChecker } from './utils/middlewares'
 
 (mongoose as any).Promise = bluebird
