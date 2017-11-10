@@ -14,8 +14,7 @@ import {
   IsUrl,
   IsISO8601,
   IsNumberString,
-  IsIn,
-  ValidateIf
+  IsIn
 } from 'class-validator'
 
 import { MetricsRepository } from '../repository/MetricsRepository'
