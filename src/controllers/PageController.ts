@@ -176,6 +176,7 @@ export class PageController {
     private userRepository: UserRepository
   ) { }
 
+  @HttpCode(204)
   @Authorized(['root'])
   @Post('/v1/page/group')
   async createGroupPage(
@@ -245,7 +246,6 @@ export class PageController {
     return { title }
   }
 
-  @HttpCode(204)
   @Authorized(['root', 'buchhalter'])
   @Get('/v1/page/')
   async getPages(
