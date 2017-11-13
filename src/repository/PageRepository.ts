@@ -63,24 +63,58 @@ export class PageRepository {
     )
   }
 
-  getPagesToUpdates(): any {
-    return Page
-      .distinct('_id', {
-        active: true,
-        meta: {
-          $exists: true,
-          $ne: []
-        }
-      }
-    ).exec()
-  }
-
   getOne(pageID: number): any {
     return Page
       .findById(pageID)
       .populate('meta.client')
       .lean()
       .exec()
+  }
+
+  getIndividualPageCounters(): any {
+    const pipeline: any = [
+      {
+        $match: {
+          active: true,
+          type: 'individual',
+          meta: {
+            $exists: true,
+            $ne: []
+          }
+        }
+      },
+      {
+        $lookup: {
+          from: 'clients',
+          localField: 'meta.client',
+          foreignField: '_id',
+          as: 'client'
+        }
+      },
+      {
+        $project: {
+          _id: 1,
+          url: 1,
+          counterID: { $arrayElemAt: ['$client.counterID', 0] }
+        }
+      }
+    ]
+    return Page
+      .aggregate(pipeline)
+      .exec()
+  }
+
+  getGroupPageCounters(): any {
+    return Page
+      .find({
+        active: true,
+        type: 'group',
+        meta: {
+          $exists: true,
+          $ne: []
+        }
+      }, '_id url counterID'
+      ).exec()
   }
 
   getPageClientsData(params: IGetPageClientsParams): any {

@@ -20,19 +20,26 @@ class Task {
     const template = 'YYYY-MM-DD'
     const startDateString = startDate.format(template)
     const endDateString = startDate.format(template)
-    const pages = await this.pageRepository.getPagesToUpdates()
+    const individualCounters = await this.pageRepository.getIndividualPageCounters()
+    const groupCounters = await this.pageRepository.getGroupPageCounters()
+    const pagesCounters = [...individualCounters, ...groupCounters]
     console.info(`Update started from ${startDateString} to ${endDateString}`)
-    for (let i = 0; i < pages.length; i += 1) {
+    const data = []
+    for (let i = 0; i < pagesCounters.length; i += 1) {
       try {
-        await this.metricsRepository.updateMetrics(
-          pages[i],
+        const batchData = await this.metricsRepository.getYMetricsByDay(
+          pagesCounters[i].url,
+          pagesCounters[i]._id,
+          pagesCounters[i].counterID,
           startDateString,
           endDateString
         )
+        data.push(...batchData)
       } catch (e) {
-        job.fail(`Failed to update page ${pages[i]}`)
+        job.fail(`Failed to update page ${pagesCounters[i]._id}`)
       }
     }
+    await this.metricsRepository.createMetrics(data)
     const t1 = process.hrtime(t0)
     console.info(`Update completed in ${t1[0]} secs.`)
     done()
