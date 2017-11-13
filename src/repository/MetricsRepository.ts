@@ -1,4 +1,5 @@
 import { Service } from 'typedi'
+import * as moment from 'moment'
 import { Metrics } from '../models/Metrics'
 import axios from '../utils/fetcher'
 import { allSources } from '../constants'
@@ -52,6 +53,13 @@ export class MetricsRepository {
   }
 
   async updateMetrics(pageID: number, startDate: string, endDate: string) {
+    const getYesterday = () => moment().add(-1, 'days').format('YYYY-MM-DD')
+    if (new Date(startDate) >= new Date()) {
+      startDate = getYesterday()
+    }
+    if (new Date(endDate) >= new Date()) {
+      endDate = getYesterday()
+    }
     const pageData = await this.pageRepository.getOne(pageID)
     const { url, type } = pageData
     let counterID: number | null = null

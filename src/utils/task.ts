@@ -1,4 +1,5 @@
 import * as moment from 'moment'
+import { log } from 'util'
 import { Container, Service } from 'typedi'
 import { PageRepository } from '../repository/PageRepository'
 import { MetricsRepository } from '../repository/MetricsRepository'
@@ -13,17 +14,17 @@ class Task {
   async updateAllMetrics(job: any, done: any): Promise<void> {
     const t0 = process.hrtime()
     let startDate = moment(job.attrs.lockedAt)
-    const endDate = moment().add(-1, 'days')
-    if (endDate > startDate) {
-      startDate = endDate
+    const yesteday = moment().add(-1, 'days')
+    if (startDate > yesteday) {
+      startDate = yesteday
     }
     const template = 'YYYY-MM-DD'
     const startDateString = startDate.format(template)
-    const endDateString = startDate.format(template)
+    const endDateString = yesteday.format(template)
     const individualCounters = await this.pageRepository.getIndividualPageCounters()
     const groupCounters = await this.pageRepository.getGroupPageCounters()
     const pagesCounters = [...individualCounters, ...groupCounters]
-    console.info(`Update started from ${startDateString} to ${endDateString}`)
+    log(`Update started from ${startDateString}`)
     const data = []
     for (let i = 0; i < pagesCounters.length; i += 1) {
       try {
@@ -39,9 +40,11 @@ class Task {
         job.fail(`Failed to update page ${pagesCounters[i]._id}`)
       }
     }
-    await this.metricsRepository.createMetrics(data)
+    if (data.length > 0) {
+      await this.metricsRepository.createMetrics(data)
+    }
     const t1 = process.hrtime(t0)
-    console.info(`Update completed in ${t1[0]} secs.`)
+    log(`Update ${pagesCounters.length} pages completed in ${t1[0]} secs.`)
     done()
   }
 }
