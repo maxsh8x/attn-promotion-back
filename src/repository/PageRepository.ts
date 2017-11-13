@@ -402,7 +402,12 @@ export class PageRepository {
   getAll(params: IGetAllParams): any {
     const { limit, offset, active, filter, clients } = params
     const query: any = filter
-      ? { $text: { $search: filter } }
+      ? {
+        $or: [
+          { url: new RegExp(filter, 'i') },
+          { title: new RegExp(filter, 'i') }
+        ]
+      }
       : {}
     if (clients.length > 0) {
       query['meta.client'] = { $in: clients }
