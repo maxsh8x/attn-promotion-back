@@ -63,6 +63,18 @@ export class PageRepository {
     )
   }
 
+  getPagesToUpdates(): any {
+    return Page
+      .distinct('_id', {
+        active: true,
+        meta: {
+          $exists: true,
+          $ne: []
+        }
+      }
+    ).exec()
+  }
+
   getOne(pageID: number): any {
     return Page
       .findById(pageID)

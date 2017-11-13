@@ -1,42 +1,42 @@
-// import { Container, Service } from 'typedi'
-// import { PageRepository } from '../repository/PageRepository'
-// import { MetricsRepository } from '../repository/MetricsRepository'
-// import { ClientRepository } from '../repository/ClientRepository'
+import * as moment from 'moment'
+import { Container, Service } from 'typedi'
+import { PageRepository } from '../repository/PageRepository'
+import { MetricsRepository } from '../repository/MetricsRepository'
 
-// @Service()
-// class Task {
-//   constructor(
-//     private pageRepository: PageRepository,
-//     private metricsRepository: MetricsRepository,
-//     private clientRepository: ClientRepository
-//   ) { }
+@Service()
+class Task {
+  constructor(
+    private pageRepository: PageRepository,
+    private metricsRepository: MetricsRepository
+  ) { }
 
-//   async updateAllMetrics(job: any, done: any): Promise<void> {
-//     const activePages = await this.pageRepository.getActivePagesURL()
-//     const clientIDs = activePages.map((page: any) => page.client)
-//     const clients = await this.clientRepository.getTokens(clientIDs)
-//     const countersMap: any = {}
-//     for (let i = 0; i < clients.length; i += 1) {
-//       countersMap[clients[i]._id] = clients[i].counterID
-//     }
-//     const items = []
-//     for (let i = 0; i < activePages.length; i++) {
-//       const metricsData = await this.metricsRepository.getYMetrics(
-//         activePages[i].url,
-//         countersMap[activePages[i].client]
-//       )
-//       items.push({
-//         ...metricsData,
-//         pageID: activePages[i]._id
-//       })
-//     }
-//     try {
-//       await this.metricsRepository.createMetrics(items)
-//       done()
-//     } catch (e) {
-//       (e.code === 11000) ? done() : done(e)
-//     }
-//   }
-// }
+  async updateAllMetrics(job: any, done: any): Promise<void> {
+    const t0 = process.hrtime()
+    let startDate = moment(job.attrs.lockedAt)
+    const endDate = moment().add(-1, 'days')
+    if (endDate > startDate) {
+      startDate = endDate
+    }
+    const template = 'YYYY-MM-DD'
+    const startDateString = startDate.format(template)
+    const endDateString = startDate.format(template)
+    const pages = await this.pageRepository.getPagesToUpdates()
+    console.info(`Update started from ${startDateString} to ${endDateString}`)
+    for (let i = 0; i < pages.length; i += 1) {
+      try {
+        await this.metricsRepository.updateMetrics(
+          pages[i],
+          startDateString,
+          endDateString
+        )
+      } catch (e) {
+        job.fail(`Failed to update page ${pages[i]}`)
+      }
+    }
+    const t1 = process.hrtime(t0)
+    console.info(`Update completed in ${t1[0]} secs.`)
+    done()
+  }
+}
 
-// export const task = Container.get(Task)
+export const task = Container.get(Task)

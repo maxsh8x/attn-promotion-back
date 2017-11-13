@@ -11,7 +11,7 @@ interface Meta {
   endDate: Date
 }
 
-interface IData extends mongoose.Document {
+export interface IData extends mongoose.Document {
   _id: number
   url: string
   title: string

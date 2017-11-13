@@ -30,6 +30,7 @@
     "@types/lru-cache": "^4.1.0",
     "@types/mongoose": "^4.7.25",
     "agenda": "^1.0.0",
+    "agendash": "^0.4.0",
     "axios": "^0.16.2",
     "body-parser": "^1.18.2",
     "cors": "^2.8.4",

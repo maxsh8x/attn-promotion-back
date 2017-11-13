@@ -95,6 +95,17 @@ accepts@~1.3.4:
     mime-types "~2.1.16"
     negotiator "0.6.1"
 
+"agenda@>=0.7.0 <1.0.0":
+  version "0.10.2"
+  resolved "https://registry.yarnpkg.com/agenda/-/agenda-0.10.2.tgz#64153164722ae277e48c06d42245d7fbac1f93f3"
+  dependencies:
+    cron "~1.1.0"
+    date.js "~0.3.1"
+    debug "^3.0.0"
+    human-interval "~0.1.3"
+    moment-timezone "^0.5.0"
+    mongodb "^2.2.10"
+
 agenda@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/agenda/-/agenda-1.0.0.tgz#ba2cdc55e26c67d87f4eabbff8486198f94f97a1"
@@ -105,6 +116,17 @@ agenda@^1.0.0:
     human-interval "~0.1.3"
     moment-timezone "^0.5.0"
     mongodb "^2.2.10"
+
+agendash@^0.4.0:
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/agendash/-/agendash-0.4.0.tgz#136526cfa1664f6d2d57da0fcfdba65b1c61974e"
+  dependencies:
+    agenda ">=0.7.0 <1.0.0"
+    async "^1.0.0"
+    body-parser "^1.15.0"
+    commander "^2.9.0"
+    express "^4.0.0"
+    semver "^5.3.0"
 
 ajv@^4.9.1:
   version "4.11.8"
@@ -199,6 +221,10 @@ async@2.1.4:
   dependencies:
     lodash "^4.14.0"
 
+async@^1.0.0:
+  version "1.5.2"
+  resolved "https://registry.yarnpkg.com/async/-/async-1.5.2.tgz#ec6a61ae56480c0c3cb241c95618e20892f9672a"
+
 asynckit@^0.4.0:
   version "0.4.0"
   resolved "https://registry.yarnpkg.com/asynckit/-/asynckit-0.4.0.tgz#c79ed97f7f34cb8f2ba1bc9790bcc366474b4b79"
@@ -258,7 +284,7 @@ bluebird@^3.3.4:
   version "3.5.0"
   resolved "https://registry.yarnpkg.com/bluebird/-/bluebird-3.5.0.tgz#791420d7f551eea2897453a8a77653f96606d67c"
 
-body-parser@1.18.2, body-parser@^1.18.2:
+body-parser@1.18.2, body-parser@^1.15.0, body-parser@^1.18.2:
   version "1.18.2"
   resolved "https://registry.yarnpkg.com/body-parser/-/body-parser-1.18.2.tgz#87678a19d84b47d859b83199bd59bce222b10454"
   dependencies:
@@ -413,6 +439,10 @@ combined-stream@^1.0.5, combined-stream@~1.0.5:
   dependencies:
     delayed-stream "~1.0.0"
 
+commander@^2.9.0:
+  version "2.11.0"
+  resolved "https://registry.yarnpkg.com/commander/-/commander-2.11.0.tgz#157152fd1e7a6c8d98a5b715cf376df928004563"
+
 concat-map@0.0.1:
   version "0.0.1"
   resolved "https://registry.yarnpkg.com/concat-map/-/concat-map-0.0.1.tgz#d8a96bd77fd68df7793a73036a3ba0d5405d477b"
@@ -517,6 +547,12 @@ debug@2.6.8:
 debug@2.6.9, debug@^2.2.0, debug@^2.4.5, debug@^2.6.8:
   version "2.6.9"
   resolved "https://registry.yarnpkg.com/debug/-/debug-2.6.9.tgz#5d128515df134ff327e90a4c93f4e077a536341f"
+  dependencies:
+    ms "2.0.0"
+
+debug@^3.0.0:
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/debug/-/debug-3.1.0.tgz#5bb5a0672628b64149566ba16819e61518c67261"
   dependencies:
     ms "2.0.0"
 
@@ -657,6 +693,41 @@ expand-range@^1.8.1:
   resolved "https://registry.yarnpkg.com/expand-range/-/expand-range-1.8.2.tgz#a299effd335fe2721ebae8e257ec79644fc85337"
   dependencies:
     fill-range "^2.1.0"
+
+express@^4.0.0:
+  version "4.16.2"
+  resolved "https://registry.yarnpkg.com/express/-/express-4.16.2.tgz#e35c6dfe2d64b7dca0a5cd4f21781be3299e076c"
+  dependencies:
+    accepts "~1.3.4"
+    array-flatten "1.1.1"
+    body-parser "1.18.2"
+    content-disposition "0.5.2"
+    content-type "~1.0.4"
+    cookie "0.3.1"
+    cookie-signature "1.0.6"
+    debug "2.6.9"
+    depd "~1.1.1"
+    encodeurl "~1.0.1"
+    escape-html "~1.0.3"
+    etag "~1.8.1"
+    finalhandler "1.1.0"
+    fresh "0.5.2"
+    merge-descriptors "1.0.1"
+    methods "~1.1.2"
+    on-finished "~2.3.0"
+    parseurl "~1.3.2"
+    path-to-regexp "0.1.7"
+    proxy-addr "~2.0.2"
+    qs "6.5.1"
+    range-parser "~1.2.0"
+    safe-buffer "5.1.1"
+    send "0.16.1"
+    serve-static "1.13.1"
+    setprototypeof "1.1.0"
+    statuses "~1.3.1"
+    type-is "~1.6.15"
+    utils-merge "1.0.1"
+    vary "~1.1.2"
 
 express@^4.16.1:
   version "4.16.1"
