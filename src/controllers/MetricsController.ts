@@ -5,7 +5,7 @@ import {
   Body,
   JsonController,
   Authorized,
-  HttpCode,
+  OnUndefined,
   QueryParams
 } from 'routing-controllers'
 import {
@@ -79,7 +79,7 @@ export class MetricsController {
     private clientRepository: ClientRepository
   ) { }
 
-  @HttpCode(204)
+  @OnUndefined(204)
   @Authorized(['root'])
   @Post('/v1/metrics')
   async updateMetrics(
@@ -87,7 +87,6 @@ export class MetricsController {
     ) {
     const { pageID, startDate, endDate } = params
     await this.metricsRepository.updateMetrics(pageID, startDate, endDate)
-    return ''
   }
 
   @Authorized(['root', 'buchhalter'])

@@ -80,4 +80,9 @@ export class UserRepository {
       .lean()
       .exec()
   }
+
+  updateByID(userID: number, data: any) {
+    return User
+      .findByIdAndUpdate(userID, data)
+  }
 }

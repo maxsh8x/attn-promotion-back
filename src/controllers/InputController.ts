@@ -4,7 +4,7 @@ import {
   Body,
   JsonController,
   Authorized,
-  HttpCode
+  OnUndefined
 } from 'routing-controllers'
 import {
   IsPositive,
@@ -46,7 +46,7 @@ export class MetricsController {
     private inputRepository: InputRepository
   ) { }
 
-  @HttpCode(204)
+  @OnUndefined(204)
   @Authorized(['root'])
   @Post('/v1/input')
   async updateInput(
@@ -66,7 +66,5 @@ export class MetricsController {
       yDate,
       value
     })
-    // TODO: issue
-    return ''
   }
 }

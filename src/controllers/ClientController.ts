@@ -6,7 +6,7 @@ import {
   JsonController,
   QueryParams,
   Authorized,
-  HttpCode,
+  OnUndefined,
   BadRequestError,
   CurrentUser
 } from 'routing-controllers'
@@ -236,7 +236,7 @@ export class ClientController {
     return result
   }
 
-  @HttpCode(204)
+  @OnUndefined(204)
   @Authorized(['root'])
   @Post('/v1/client')
   async createClient(
@@ -253,11 +253,9 @@ export class ClientController {
       vatin,
       counterID
     })
-    // TODO: issue
-    return ''
   }
 
-  @HttpCode(204)
+  @OnUndefined(204)
   @Authorized(['root'])
   @Post('/v1/client/bind')
   async bindPage(
@@ -279,7 +277,5 @@ export class ClientController {
       startDate,
       endDate
     })
-    // TODO: issue
-    return ''
   }
 }

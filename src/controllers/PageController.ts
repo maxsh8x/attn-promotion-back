@@ -9,7 +9,7 @@ import {
   Authorized,
   Patch,
   Param,
-  HttpCode,
+  OnUndefined,
   BadRequestError,
   CurrentUser
 } from 'routing-controllers'
@@ -176,7 +176,7 @@ export class PageController {
     private userRepository: UserRepository
   ) { }
 
-  @HttpCode(204)
+  @OnUndefined(204)
   @Authorized(['root'])
   @Post('/v1/page/group')
   async createGroupPage(
@@ -197,7 +197,6 @@ export class PageController {
         type: 'group'
       }
     )
-    return ''
   }
 
   @Authorized(['root'])
@@ -340,7 +339,7 @@ export class PageController {
     return { pageData, views: metricsMap, total }
   }
 
-  @HttpCode(204)
+  @OnUndefined(204)
   @Patch('/v1/page/:pageID/status')
   async updateStatus(
     @Param('pageID') pageID: number,
@@ -348,8 +347,6 @@ export class PageController {
     ) {
     const { active } = params
     await this.pageRepository.updateStatus(pageID, active)
-    // TODO: issue
-    return ''
   }
 
   @Authorized(['root', 'buchhalter'])
@@ -366,7 +363,7 @@ export class PageController {
     return result
   }
 
-  @HttpCode(204)
+  @OnUndefined(204)
   @Authorized(['root', 'manager'])
   @Post('/v1/page/bind')
   async bindClients(
@@ -389,7 +386,5 @@ export class PageController {
       endDate: new Date(endDate)
     })
     await this.metricsRepository.updateMetrics(page, startDate, endDate)
-    // TODO: issue
-    return ''
   }
 }

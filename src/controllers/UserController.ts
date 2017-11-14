@@ -2,13 +2,15 @@ import { Service } from 'typedi'
 import {
   Get,
   Post,
+  Patch,
   JsonController,
   Body,
   Authorized,
   NotFoundError,
   BadRequestError,
-  HttpCode,
-  QueryParams
+  QueryParams,
+  Param,
+  OnUndefined
 } from 'routing-controllers'
 import { UserRepository } from '../repository/UserRepository'
 import { TokenRepository } from '../repository/TokenRepository'
@@ -105,7 +107,7 @@ export class UserController {
   }
 
   // TODO: zxcvbn
-  @HttpCode(204)
+  @OnUndefined(204)
   @Authorized(['root'])
   @Post('/v1/user')
   async createUser( @Body() params: CreateUserParams) {
@@ -126,8 +128,6 @@ export class UserController {
       role: role as ROLES_TYPE
     })
     await this.userRepository.initCache(_id, { active: true })
-    // TODO: issue
-    return ''
   }
 
   @Authorized(['root', 'buchhalter'])
@@ -143,7 +143,7 @@ export class UserController {
     return { usersData, total }
   }
 
-  @HttpCode(204)
+  @OnUndefined(204)
   @Authorized(['root'])
   @Post('/v1/user/bind')
   async bindClient(
@@ -161,7 +161,21 @@ export class UserController {
       case 'unbind':
         await this.userRepository.unbindClient(user, clients)
     }
-    // TODO: issue
-    return ''
+  }
+
+  @OnUndefined(204)
+  @Authorized(['root'])
+  @Patch('/v1/user/:userID')
+  async updateUser(
+    @Param('userID') userID: number,
+    @Body() params: any
+  ) {
+    const allowedFields = ['username', 'name', 'email']
+    for (let param in params) {
+      if (allowedFields.indexOf(param) === -1) {
+        throw new BadRequestError('INVALID_FIELD')
+      }
+    }
+    await this.userRepository.updateByID(userID, params)
   }
 }
