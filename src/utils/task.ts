@@ -13,7 +13,7 @@ class Task {
 
   async updateAllMetrics(job: any, done: any): Promise<void> {
     const t0 = process.hrtime()
-    let startDate = moment(job.attrs.lockedAt)
+    let startDate = moment(job.attrs.lastFinishedAt)
     const yesteday = moment().add(-1, 'days')
     if (startDate > yesteday) {
       startDate = yesteday
