@@ -16,7 +16,6 @@ export interface IData extends mongoose.Document {
   url: string
   title: string
   active: boolean
-  parent: number
   type: QUESTION_VARIANT_TYPE
   meta: Meta[]
 }
@@ -42,7 +41,6 @@ const Data = new mongoose.Schema(
     url: { type: String, required: true, unique: true },
     title: { type: String, required: true },
     active: { type: Boolean, default: true },
-    parent: { type: Number, required: false },
     counterID: { type: Number, required: false },
     type: { type: String, required: true, enum: QUESTION_VARIANT_ARRAY },
     meta: [Meta]
