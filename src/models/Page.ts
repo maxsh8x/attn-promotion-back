@@ -3,7 +3,7 @@ import {QUESTION_VARIANT_ARRAY, QUESTION_VARIANT_TYPE } from '../constants'
 // TODO: fix old @types
 const AutoIncrement = require('mongoose-sequence')(mongoose)
 
-interface Meta {
+export interface IMeta {
   client: number
   minViews: number
   maxViews: number
@@ -17,12 +17,11 @@ export interface IData extends mongoose.Document {
   title: string
   active: boolean
   type: QUESTION_VARIANT_TYPE
-  meta: Meta[]
+  meta: IMeta[]
 }
 
-const Meta = new mongoose.Schema(
+export const Meta = new mongoose.Schema(
   {
-    _id: Number,
     client: { type: Number, ref: 'Client', required: true },
     minViews: { type: Number, required: true },
     maxViews: { type: Number, required: true },

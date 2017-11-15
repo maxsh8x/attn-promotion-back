@@ -1,6 +1,9 @@
 import { Service } from 'typedi'
 import { Page } from '../models/Page'
+import { Archive } from '../models/Archive'
 import { QUESTION_VARIANT_TYPE } from '../constants'
+
+const Fawn = require('fawn')
 
 interface IGetAllParams {
   limit: number,
@@ -61,6 +64,29 @@ export class PageRepository {
     return Page.findOne({ url: params.url }).then(
       (doc: any) => doc ? doc : Page.create(params)
     )
+  }
+
+  getArchive(page: number, client: number) {
+    return Archive
+      .find({ page, client }, 'minViews maxViews startDate endDate')
+      .lean()
+      .exec()
+  }
+
+  archiveMeta(page: number, client: number) {
+    return Page
+      .findById(page, {
+        url: 1,
+        meta: { $elemMatch: { client } }
+      })
+      .lean()
+      .exec()
+      .then((doc: any) =>
+        Fawn.Task()
+          .update('pages', { url: doc.url }, { $pull: { meta: { client } } })
+          .save('archives', new Archive({ page, ...doc.meta[0] }))
+          .run({useMongoose: true})
+      )
   }
 
   getOne(pageID: number): any {

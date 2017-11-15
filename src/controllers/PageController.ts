@@ -99,6 +99,11 @@ export class UpdateStatusParams {
   active: boolean
 }
 
+export class AchieveParams {
+  pageID: number
+  clientID: number
+}
+
 export class CountParams {
   @IsBooleanString()
   active: string
@@ -347,6 +352,24 @@ export class PageController {
     ) {
     const { active } = params
     await this.pageRepository.updateStatus(pageID, active)
+  }
+
+  @Get('/v1/page/:pageID/archive/:clientID')
+  async getArchieve(
+    @Param('pageID') pageID: number,
+    @Param('clientID') clientID: number
+  ) {
+    const data = await this.pageRepository.getArchive(pageID, clientID)
+    return data
+  }
+
+  @OnUndefined(204)
+  @Patch('/v1/page/archive')
+  async toArchieve(
+    @Body() params: AchieveParams
+    ) {
+    const { pageID, clientID } = params
+    await this.pageRepository.archiveMeta(pageID, clientID)
   }
 
   @Authorized(['root', 'buchhalter'])

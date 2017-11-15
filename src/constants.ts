@@ -11,6 +11,3 @@ export type CHART_INTERVAL_TYPE = 'days' | 'months'
 
 export const QUESTION_VARIANT_ARRAY = ['group', 'individual']
 export type QUESTION_VARIANT_TYPE = 'group' | 'individual'
-
-export const TRANSACTION_STATES_ARRAY = ['initial', 'pending', 'applied', 'done', 'canceling', 'canceled']
-export type TRANSACTION_STATES_TYPE = 'initial' | 'pending' | 'applied' | 'done' | 'canceling' | 'canceled'

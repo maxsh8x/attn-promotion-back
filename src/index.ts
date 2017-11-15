@@ -7,6 +7,7 @@ import { Container } from 'typedi'
 import { getAppConfig, validateConfig } from './utils/config'
 import { task } from './utils/task'
 import { authorizationChecker, currentUserChecker } from './utils/middlewares'
+const Fawn = require('fawn');
 
 (mongoose as any).Promise = bluebird
 global.Promise = bluebird
@@ -40,6 +41,7 @@ useContainer(Container);
   await mongoose.connect(config.mongoDB, {
     useMongoClient: true
   })
+  Fawn.init(mongoose)
 
   const agenda = new Agenda({ db: { address: config.agendaMongoDB } })
   agenda.define('update metrics', (job, done) => {
