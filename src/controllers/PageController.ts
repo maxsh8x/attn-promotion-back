@@ -100,7 +100,10 @@ export class UpdateStatusParams {
 }
 
 export class AchieveParams {
+  @IsPositive()
   pageID: number
+
+  @IsPositive()
   clientID: number
 }
 
