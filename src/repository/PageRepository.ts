@@ -68,7 +68,7 @@ export class PageRepository {
 
   getArchive(page: number, client: number) {
     return Archive
-      .find({ page, client }, 'minViews maxViews startDate endDate')
+      .find({ page, client }, 'minViews maxViews startDate endDate costPerClick')
       .lean()
       .exec()
   }
