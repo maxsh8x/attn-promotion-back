@@ -62,7 +62,7 @@ export class MetricsRepository {
     if (new Date(endDate) >= now) {
       endDate = getYesterday()
     }
-    const pageData = await this.pageRepository.getOne(pageID)
+    const pageData = await this.pageRepository.getOneWithClients(pageID)
     const { url, type } = pageData
     let counterID: number | null = null
     if (type === 'group') {

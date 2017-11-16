@@ -225,23 +225,38 @@ export class PageController {
     } = params
     const url = getStartURLPath(rawURL)
     const title = await getTitle(rawURL)
-    const pageData = await this.pageRepository.create({
-      url,
-      title,
-      parent,
-      type,
-      meta: [{
-        client,
+    const pageData = await this.pageRepository.getPageClientByURL(url, client)
+    const { _id: page } = pageData
+    if (!page) {
+      await this.pageRepository.create({
+        url,
+        title,
+        parent,
+        type,
+        meta: [{
+          client,
+          minViews,
+          maxViews,
+          costPerClick,
+          startDate,
+          endDate
+        }]
+      })
+    } else if (page && !pageData.meta) {
+      await this.pageRepository.bindClients({
+        page,
         minViews,
         maxViews,
         costPerClick,
-        startDate,
-        endDate
-      }]
-    })
-    const { _id: pageID } = pageData
-    await this.metricsRepository.updateMetrics(pageID, startDate, endDate)
-    return { pageID }
+        clients: [client],
+        startDate: new Date(startDate),
+        endDate: new Date(endDate)
+      })
+    } else {
+      throw new BadRequestError('ALREADY_EXISTS')
+    }
+    await this.metricsRepository.updateMetrics(page, startDate, endDate)
+    return { page }
   }
 
   @Authorized(['root', 'buchhalter'])

@@ -61,9 +61,7 @@ interface IGetQuestionsParams {
 @Service()
 export class PageRepository {
   create(params: any): any {
-    return Page.findOne({ url: params.url }).then(
-      (doc: any) => doc ? doc : Page.create(params)
-    )
+    return Page.create(params)
   }
 
   getArchive(page: number, client: number) {
@@ -85,11 +83,21 @@ export class PageRepository {
         Fawn.Task()
           .update('pages', { url: doc.url }, { $pull: { meta: { client } } })
           .save('archives', new Archive({ page, ...doc.meta[0] }))
-          .run({useMongoose: true})
+          .run({ useMongoose: true })
       )
   }
 
-  getOne(pageID: number): any {
+  getPageClientByURL(url: string, client: number): any {
+    return Page
+      .findOne(
+      { url },
+      { meta: { $elemMatch: { client } } }
+      )
+      .lean()
+      .exec()
+  }
+
+  getOneWithClients(pageID: number): any {
     return Page
       .findById(pageID)
       .populate('meta.client')
