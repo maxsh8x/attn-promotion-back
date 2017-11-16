@@ -127,4 +127,9 @@ export class ClientRepository {
       .lean()
       .exec()
   }
+
+  updateByID(clientID: number, data: any) {
+    return Client
+      .findByIdAndUpdate(clientID, data)
+  }
 }

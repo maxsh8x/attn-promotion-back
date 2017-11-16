@@ -8,7 +8,9 @@ import {
   Authorized,
   OnUndefined,
   BadRequestError,
-  CurrentUser
+  CurrentUser,
+  Patch,
+  Param
 } from 'routing-controllers'
 import {
   IsString,
@@ -277,5 +279,21 @@ export class ClientController {
       startDate,
       endDate
     })
+  }
+
+  @OnUndefined(204)
+  @Authorized(['root'])
+  @Patch('/v1/client/:clientID')
+  async updateUser(
+    @Param('clientID') clientID: number,
+    @Body() params: any
+  ) {
+    const allowedFields = ['name', 'brand', 'vatin']
+    for (let param in params) {
+      if (allowedFields.indexOf(param) === -1) {
+        throw new BadRequestError('INVALID_FIELD')
+      }
+    }
+    await this.clientRepository.updateByID(clientID, params)
   }
 }
