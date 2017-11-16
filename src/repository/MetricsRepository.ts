@@ -54,10 +54,12 @@ export class MetricsRepository {
 
   async updateMetrics(pageID: number, startDate: string, endDate: string) {
     const getYesterday = () => moment().add(-1, 'days').format('YYYY-MM-DD')
-    if (new Date(startDate) >= new Date()) {
+    const now = new Date()
+    now.setHours(0, 0, 0, 0)
+    if (new Date(startDate) >= now) {
       startDate = getYesterday()
     }
-    if (new Date(endDate) >= new Date()) {
+    if (new Date(endDate) >= now) {
       endDate = getYesterday()
     }
     const pageData = await this.pageRepository.getOne(pageID)

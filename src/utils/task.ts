@@ -13,18 +13,13 @@ class Task {
 
   async updateAllMetrics(job: any, done: any): Promise<void> {
     const t0 = process.hrtime()
-    let startDate = moment(job.attrs.lastFinishedAt)
-    const yesteday = moment().add(-1, 'days')
-    if (startDate > yesteday) {
-      startDate = yesteday
-    }
     const template = 'YYYY-MM-DD'
-    const startDateString = startDate.format(template)
-    const endDateString = yesteday.format(template)
+    const startDate = moment(job.attrs.lastFinishedAt).format(template)
+    const endDate = moment().add(-1, 'days').format(template)
     const individualCounters = await this.pageRepository.getIndividualPageCounters()
     const groupCounters = await this.pageRepository.getGroupPageCounters()
     const pagesCounters = [...individualCounters, ...groupCounters]
-    log(`Update started from ${startDateString}`)
+    log(`Update started from ${startDate}`)
     const data = []
     for (let i = 0; i < pagesCounters.length; i += 1) {
       try {
@@ -32,8 +27,8 @@ class Task {
           pagesCounters[i].url,
           pagesCounters[i]._id,
           pagesCounters[i].counterID,
-          startDateString,
-          endDateString
+          startDate,
+          endDate
         )
         data.push(...batchData)
       } catch (e) {
