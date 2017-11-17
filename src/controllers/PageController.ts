@@ -269,6 +269,13 @@ export class PageController {
   }
 
   @Authorized(['root', 'buchhalter'])
+  @Get('/v1/page/report')
+  async getReport() {
+    const data = await this.pageRepository.getReportCampaigns(10, 5)
+    return data
+  }
+
+  @Authorized(['root', 'buchhalter'])
   @Get('/v1/page/')
   async getPages(
     @QueryParams() params: GetPagesParams

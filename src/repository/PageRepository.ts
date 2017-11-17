@@ -64,6 +64,42 @@ export class PageRepository {
     return Page.create(params)
   }
 
+  getReportCampaigns(page: number, client: number) {
+    return Promise.all([
+      Page
+        .findOne(
+        { _id: page, 'meta.client': client },
+        { meta: { $elemMatch: { client } } }
+        )
+        .lean()
+        .exec(),
+      Archive
+        .find({ page, client }, '-_id startDate endDate')
+        .lean()
+        .exec()
+    ]).then(
+      ([page = { page: { meta: [] } }, archives]: [any, any]) => {
+        const campaigns = []
+        for (let i = 0; i < page.meta.length; i += 1) {
+          campaigns.push({
+            startDate: page.meta[i].startDate,
+            endDate: page.meta[i].endDate
+          })
+        }
+        for (let i = 0; i < archives.length; i++) {
+          campaigns.push({
+            startDate: archives[i].startDate,
+            endDate: archives[i].endDate
+          })
+        }
+        campaigns.sort(
+          (a: any, b: any): any => new Date(a.endDate) < new Date(b.endDate)
+        )
+        return campaigns
+      }
+      )
+  }
+
   getArchive(page: number, client: number) {
     return Archive
       .find({ page, client }, 'minViews maxViews startDate endDate costPerClick')
