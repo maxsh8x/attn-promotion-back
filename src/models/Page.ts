@@ -1,5 +1,5 @@
 import * as mongoose from 'mongoose'
-import {QUESTION_VARIANT_ARRAY, QUESTION_VARIANT_TYPE } from '../constants'
+import { QUESTION_VARIANT_ARRAY, QUESTION_VARIANT_TYPE } from '../constants'
 // TODO: fix old @types
 const AutoIncrement = require('mongoose-sequence')(mongoose)
 

@@ -69,6 +69,20 @@ export class PromotionChartParams {
   interval: CHART_INTERVAL_TYPE
 }
 
+export class ReportParams {
+  @IsISO8601()
+  startDate: string
+
+  @IsISO8601()
+  endDate: string
+
+  @IsNumberString()
+  pageID: string
+
+  @IsNumberString()
+  clientID: string
+}
+
 @Service()
 @JsonController()
 export class MetricsController {
@@ -98,6 +112,20 @@ export class MetricsController {
     const data = await this.metricsRepository.getMetrics(yDate, parseInt(pageID, 10))
     const result = byMetric(data)
     return result
+  }
+
+  @Authorized(['root', 'buchhalter'])
+  @Get('/v1/metrics/report')
+  async getReport(
+    @QueryParams() params: ReportParams
+    ) {
+    const { startDate, endDate, pageID, clientID } = params
+    const data = await this.metricsRepository.getReport({
+      startDate: new Date(startDate),
+      endDate: new Date(endDate),
+      pageID: parseInt(pageID, 10)
+    })
+    return data
   }
 
   @Authorized(['root', 'buchhalter'])

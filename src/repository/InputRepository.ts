@@ -31,13 +31,14 @@ export class InputRepository {
 
   getByPageIDs(pageIDs: number[], yDate: string): any {
     const date = new Date(yDate)
+    // TODO: $max
     const pipeline = [
       { $match: { date, page: { $in: pageIDs } } },
       {
         $group: {
           _id: { page: '$page', source: '$source' },
-          cost: { $max: { $cond: [{ $eq: ['$type', 'cost'] }, '$value', 0] } },
-          clicks: { $max: { $cond: [{ $eq: ['$type', 'clicks'] }, '$value', 0] } }
+          cost: { $sum: { $cond: [{ $eq: ['$type', 'cost'] }, '$value', 0] } },
+          clicks: { $sum: { $cond: [{ $eq: ['$type', 'clicks'] }, '$value', 0] } }
         }
       },
       {

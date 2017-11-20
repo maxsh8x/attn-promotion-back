@@ -7,6 +7,7 @@ import { CHART_INTERVAL_TYPE } from '../constants'
 import { getCostPipeline } from '../utils/metrics'
 import { PageRepository } from '../repository/PageRepository'
 import { ClientRepository } from '../repository/ClientRepository'
+import { Input } from '../models/Input';
 
 export class DataItem {
   [name: string]: Array<number>
@@ -21,6 +22,12 @@ interface IGetCostChartParams {
   startDate: Date,
   endDate: Date,
   interval: CHART_INTERVAL_TYPE,
+  pageID: number
+}
+
+interface IGetReportParams {
+  startDate: Date,
+  endDate: Date,
   pageID: number
 }
 
@@ -174,6 +181,94 @@ export class MetricsRepository {
       )
       .lean()
       .exec()
+  }
+
+  getReport(params: IGetReportParams) {
+    const { startDate, endDate, pageID: page } = params
+    const matchStageBase = {
+      page,
+      date: {
+        $gte: startDate,
+        $lte: endDate
+      }
+    }
+
+    const groupStageBase = {
+      _id: {
+        year: { $year: '$date' },
+        month: { $month: '$date' },
+        day: { $dayOfMonth: '$date' }
+      },
+      date: { $first: '$date' }
+    }
+
+    const projectStage = {
+      id: { $dateToString: { format: '%Y-%m-%d', date: '$date' } }
+    }
+
+    return Promise.all([
+      Metrics.aggregate([
+        { $match: matchStageBase },
+        {
+          $group: {
+            ...groupStageBase,
+            views: { $sum: '$pageviews' }
+          }
+        },
+        {
+          $project: {
+            ...projectStage,
+            views: 1
+          }
+        }
+      ]).exec(),
+      Input.aggregate([
+        { $match: matchStageBase },
+        {
+          $group: {
+            ...groupStageBase,
+            cost: { $sum: { $cond: [{ $eq: ['$type', 'cost'] }, '$value', 0] } },
+            clicks: { $sum: { $cond: [{ $eq: ['$type', 'clicks'] }, '$value', 0] } }
+          }
+        },
+        {
+          $project: {
+            ...projectStage,
+            cost: 1,
+            clicks: 1
+          }
+        }
+      ]).exec()
+    ]).then(([metrics, inputs]) => {
+      const resultMap = new Map()
+      for (let i = 0; i < metrics.length; i++) {
+        resultMap.set(metrics[i].id, {
+          views: metrics[i].views
+        })
+      }
+      for (let i = 0; i < inputs.length; i++) {
+        if (resultMap.has(inputs[i].id)) {
+          resultMap.set(inputs[i].id, {
+            ...resultMap.get(inputs[i].id),
+            cost: inputs[i].cost,
+            clicks: inputs[i].clicks
+          })
+        } else {
+          resultMap.set(inputs[i].id, {
+            cost: inputs[i].cost,
+            clicks: inputs[i].clicks
+          })
+        }
+      }
+      const result = []
+      for (let item of resultMap) {
+        result.push({
+          id: item[0],
+          ...item[1]
+        })
+      }
+      return result
+    })
   }
 
   lineChart(startDate: Date, endDate: Date, pages: number[]) {
