@@ -78,20 +78,20 @@ export class PageRepository {
         .lean()
         .exec()
     ]).then(
-      ([page, archives]: [any, any]) => {
+      ([activePages, archivePages]: [any, any]) => {
         const campaigns = []
-        if (page) {
-          for (let i = 0; i < page.meta.length; i += 1) {
+        if (activePages) {
+          for (let i = 0; i < activePages.meta.length; i += 1) {
             campaigns.push({
-              startDate: page.meta[i].startDate,
-              endDate: page.meta[i].endDate
+              startDate: activePages.meta[i].startDate,
+              endDate: activePages.meta[i].endDate
             })
           }
         }
-        for (let i = 0; i < archives.length; i++) {
+        for (let i = 0; i < archivePages.length; i++) {
           campaigns.push({
-            startDate: archives[i].startDate,
-            endDate: archives[i].endDate
+            startDate: archivePages[i].startDate,
+            endDate: archivePages[i].endDate
           })
         }
         campaigns.sort(
