@@ -78,13 +78,15 @@ export class PageRepository {
         .lean()
         .exec()
     ]).then(
-      ([page = { page: { meta: [] } }, archives]: [any, any]) => {
+      ([page, archives]: [any, any]) => {
         const campaigns = []
-        for (let i = 0; i < page.meta.length; i += 1) {
-          campaigns.push({
-            startDate: page.meta[i].startDate,
-            endDate: page.meta[i].endDate
-          })
+        if (page) {
+          for (let i = 0; i < page.meta.length; i += 1) {
+            campaigns.push({
+              startDate: page.meta[i].startDate,
+              endDate: page.meta[i].endDate
+            })
+          }
         }
         for (let i = 0; i < archives.length; i++) {
           campaigns.push({
@@ -105,6 +107,13 @@ export class PageRepository {
       .find({ page, client }, 'minViews maxViews startDate endDate costPerClick')
       .lean()
       .exec()
+      .then((docs: any) => {
+        for (let i = 0; i < docs.length; i++) {
+          docs[i].id = docs[i]._id.toString()
+          delete docs[i]._id
+        }
+        return docs
+      })
   }
 
   archiveMeta(page: number, client: number) {
@@ -185,6 +194,41 @@ export class PageRepository {
         }
       }, '_id url counterID'
       ).exec()
+  }
+
+  getClientsPages(client: number) {
+    return Promise.all([
+      Page
+        .find({ 'meta.client': client })
+        .lean()
+        .exec(),
+      Archive.find({ client })
+        .populate('pageData')
+        .lean()
+        .exec()
+    ]).then(([activePages, archivePages]: [any, any]) => {
+      const pagesData = new Map()
+      for (let i = 0; i < activePages.length; i++) {
+        pagesData.set(
+          activePages[i]._id,
+          activePages[i].title
+        )
+      }
+      for (let i = 0; i < archivePages.length; i++) {
+        pagesData.set(
+          archivePages[i].pageData._id,
+          archivePages[i].pageData.title
+        )
+      }
+      const result = []
+      for (let value of pagesData.entries()) {
+        result.push({
+          id: value[0],
+          title: value[1]
+        })
+      }
+      return result
+    })
   }
 
   getPageClientsData(params: IGetPageClientsParams): any {

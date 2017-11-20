@@ -1,5 +1,4 @@
 import * as mongoose from 'mongoose'
-const mongooseLeanId = require('mongoose-lean-id')
 
 export interface IData {
   _id: number
@@ -28,6 +27,11 @@ export const Data = new mongoose.Schema(
   }
 )
 
-Data.plugin(mongooseLeanId)
+Data.virtual('pageData', {
+  ref: 'Page',
+  localField: 'page',
+  foreignField: '_id',
+  justOne: true
+})
 
 export const Archive = mongoose.model<IData & mongoose.Document>('Archive', Data)

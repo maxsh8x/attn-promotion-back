@@ -41,7 +41,6 @@
     "lru-cache": "^4.1.1",
     "momentjs": "^2.0.0",
     "mongoose": "^4.11.13",
-    "mongoose-lean-id": "^0.1.0",
     "mongoose-sequence": "^4.0.0",
     "reflect-metadata": "^0.1.10",
     "routing-controllers": "^0.7.6",

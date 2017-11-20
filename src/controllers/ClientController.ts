@@ -200,6 +200,15 @@ export class ClientController {
   }
 
   @Authorized(['root', 'buchhalter', 'manager'])
+  @Get('/v1/client/pages/:clientID')
+  async getClientPages(
+    @Param('clientID') clientID: number
+  ) {
+    const data = await this.pageRepository.getClientsPages(clientID)
+    return data
+  }
+
+  @Authorized(['root', 'buchhalter', 'manager'])
   @Get('/v1/client/search')
   async searchClients(
     @QueryParams() params: SearchClientsParams,

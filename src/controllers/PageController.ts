@@ -269,9 +269,12 @@ export class PageController {
   }
 
   @Authorized(['root', 'buchhalter'])
-  @Get('/v1/page/report')
-  async getReport() {
-    const data = await this.pageRepository.getReportCampaigns(10, 5)
+  @Get('/v1/page/:pageID/report/:clientID')
+  async getReport(
+    @Param('pageID') pageID: number,
+    @Param('clientID') clientID: number
+  ) {
+    const data = await this.pageRepository.getReportCampaigns(pageID, clientID)
     return data
   }
 
