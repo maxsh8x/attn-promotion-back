@@ -95,25 +95,11 @@ export class PageRepository {
           })
         }
         campaigns.sort(
-          (a: any, b: any): any => new Date(a.endDate) < new Date(b.endDate)
+          (a: any, b: any): any => +new Date(b.endDate) - +new Date(a.endDate)
         )
         return campaigns
       }
       )
-  }
-
-  getArchive(page: number, client: number) {
-    return Archive
-      .find({ page, client }, 'minViews maxViews startDate endDate costPerClick')
-      .lean()
-      .exec()
-      .then((docs: any) => {
-        for (let i = 0; i < docs.length; i++) {
-          docs[i].id = docs[i]._id.toString()
-          delete docs[i]._id
-        }
-        return docs
-      })
   }
 
   archiveMeta(page: number, client: number) {

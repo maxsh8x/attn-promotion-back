@@ -267,6 +267,9 @@ export class MetricsRepository {
           ...item[1]
         })
       }
+      result.sort(
+        (a: any, b: any): any => +new Date(b.id) - +new Date(a.id)
+      )
       return result
     })
   }
