@@ -23,7 +23,14 @@ interface IGetHistorical extends IGetArchiveBase {
 @Service()
 export class ArchiveRepository {
   getLatest(params: IGetLatest): any {
-    const { clientID: client, startDate, endDate, offset, limit } = params
+    const {
+      clientID: client,
+      startDate,
+      endDate,
+      offset,
+      limit,
+      type
+    } = params
     const pagination = []
     if (!([offset, limit]).every(item => isNaN(item))) {
       pagination.push(...[
@@ -31,8 +38,14 @@ export class ArchiveRepository {
         { $limit: limit }
       ])
     }
+
+    const matchStage: any = { $match: { client } }
+    if (type !== 'all') {
+      matchStage.$match.type = type
+    }
+
     const pipeline: any = [
-      { $match: { client } },
+      matchStage,
       { $sort: { 'archivedAt': -1 } },
       {
         $group: {
@@ -57,8 +70,21 @@ export class ArchiveRepository {
         }
       },
       {
+        $lookup: {
+          from: 'pages',
+          localField: '_id.page',
+          foreignField: '_id',
+          as: 'page'
+        }
+      },
+      { $unwind: '$page' },
+      {
         $project: {
           _id: '$meta.page',
+          url: '$page.url',
+          title: '$page.title',
+          type: '$page.type',
+          active: '$page.active',
           startDate: '$meta.startDate',
           endDate: '$meta.endDate',
           costPerClick: '$meta.costPerClick',
@@ -68,11 +94,29 @@ export class ArchiveRepository {
         }
       }
     ]
+
+    const countPipeline = [
+      matchStage,
+      {
+        $group: {
+          _id: {
+            page: '$page',
+            client: '$client'
+          }
+        }
+      },
+      {
+        $count: 'total'
+      }
+    ]
     return Promise.all([
       Archive
         .aggregate(pipeline)
         .exec(),
-      Archive.count({ client })
+      Archive
+        .aggregate(countPipeline)
+        .exec()
+        .then(([doc]: any) => doc ? doc.total : 0)
     ])
   }
 
