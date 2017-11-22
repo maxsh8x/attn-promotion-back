@@ -107,6 +107,7 @@ export class PageRepository {
     return Page
       .findById(page, {
         url: 1,
+        type: 1,
         meta: { $elemMatch: { client } }
       })
       .lean()
@@ -114,7 +115,11 @@ export class PageRepository {
       .then((doc: any) =>
         Fawn.Task()
           .update('pages', { url: doc.url }, { $pull: { meta: { client } } })
-          .save('archives', new Archive({ page, ...doc.meta[0] }))
+          .save('archives', new Archive({
+            type: doc.type,
+            ...doc.meta[0],
+            page
+          }))
           .run({ useMongoose: true })
       )
   }

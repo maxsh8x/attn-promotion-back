@@ -1,4 +1,5 @@
 import * as mongoose from 'mongoose'
+import { QUESTION_VARIANT_ARRAY, QUESTION_VARIANT_TYPE } from '../constants'
 
 export interface IData {
   page: number
@@ -7,6 +8,9 @@ export interface IData {
   maxViews: number
   startDate: Date
   endDate: Date
+  costPerClick: number
+  archivedAt: Date
+  type: QUESTION_VARIANT_TYPE
 }
 
 export const Data = new mongoose.Schema(
@@ -18,7 +22,8 @@ export const Data = new mongoose.Schema(
     startDate: { type: Date, required: true },
     endDate: { type: Date, required: true },
     costPerClick: { type: Number, required: true },
-    archivedAt: { type: Date, default: Date.now }
+    archivedAt: { type: Date, default: Date.now },
+    type: { type: String, required: true, enum: QUESTION_VARIANT_ARRAY }
   }
 )
 
