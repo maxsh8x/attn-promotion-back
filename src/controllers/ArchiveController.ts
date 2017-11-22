@@ -69,7 +69,7 @@ export class ClientController {
     @QueryParams() params: GetLatestParams
     ) {
     const { offset, limit, clientID, startDate, endDate, type } = params
-    const [archiveData, total] = await this.archiveRepository.getLatest({
+    const [pagesData, total] = await this.archiveRepository.getLatest({
       offset: parseInt(offset, 10),
       limit: parseInt(limit, 10),
       clientID: parseInt(clientID, 10),
@@ -77,7 +77,7 @@ export class ClientController {
       endDate: new Date(endDate),
       type
     })
-    return { archiveData, total }
+    return { pagesData, total }
   }
 
   @Authorized(['root', 'buchhalter', 'manager'])
