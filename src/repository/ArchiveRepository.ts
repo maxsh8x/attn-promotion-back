@@ -90,7 +90,12 @@ export class ArchiveRepository {
           costPerClick: '$meta.costPerClick',
           maxViews: '$meta.maxViews',
           minViews: '$meta.minViews',
-          ...getViewsProjections(startDate, endDate)
+          ...getViewsProjections(
+            startDate,
+            endDate,
+            '$meta.startDate',
+            '$meta.endDate'
+          )
         }
       }
     ]
@@ -120,14 +125,43 @@ export class ArchiveRepository {
     ])
   }
 
-  getHistorical(params: IGetHistorical): any {
-    const { clientID: client, pageID: page } = params
-
+  getPageHistorical(params: IGetHistorical): any {
+    const { clientID: client, pageID: page, startDate, endDate } = params
+    const pipeline: any = [
+      { $match: { client, page } },
+      { $sort: { 'archivedAt': -1 } },
+      { $skip: 1 },
+      {
+        $graphLookup: {
+          from: 'metrics',
+          startWith: '$page',
+          connectFromField: 'page',
+          connectToField: 'page',
+          as: 'metrics',
+          restrictSearchWithMatch: {
+            type: 'total'
+          }
+        }
+      },
+      {
+        $project: {
+          _id: '$meta.page',
+          startDate: '$startDate',
+          endDate: '$endDate',
+          costPerClick: '$costPerClick',
+          maxViews: '$maxViews',
+          minViews: '$minViews',
+          ...getViewsProjections(
+            startDate,
+            endDate,
+            '$startDate',
+            '$endDate'
+          )
+        }
+      }
+    ]
     return Archive
-      .find({ page, client })
-      // .sort({ 'archivedAt': -1 })
-      // .skip(1)
-      // .lean()
+      .aggregate(pipeline)
       .exec()
   }
 }

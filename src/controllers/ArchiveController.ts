@@ -28,12 +28,6 @@ export class AchieveParams {
 }
 
 class BaseGetArchiveParams {
-  @IsOptional()
-  offset: string
-
-  @IsOptional()
-  limit: string
-
   @IsISO8601()
   startDate: string
 
@@ -45,6 +39,14 @@ class BaseGetArchiveParams {
 
   @IsIn(['all', 'group', 'individual'])
   type: 'all' | 'group' | 'individual'
+}
+
+class GetLatestParams extends BaseGetArchiveParams {
+  @IsOptional()
+  offset: string
+
+  @IsOptional()
+  limit: string
 }
 
 class GetHistoricalParams extends BaseGetArchiveParams {
@@ -61,9 +63,9 @@ export class ClientController {
   ) { }
 
   @Authorized(['root', 'buchhalter', 'manager'])
-  @Get('/v1/archive/client/')
+  @Get('/v1/archive/latest/')
   async getLatest(
-    @QueryParams() params: BaseGetArchiveParams
+    @QueryParams() params: GetLatestParams
     ) {
     const { offset, limit, clientID, startDate, endDate, type } = params
     const [archiveData, total] = await this.archiveRepository.getLatest({
@@ -78,13 +80,19 @@ export class ClientController {
   }
 
   @Authorized(['root', 'buchhalter', 'manager'])
-  @Get('/v1/archive/:pageID/client/:clientID')
-  async getHistorical(
-    @Param('pageID') pageID: number,
-    @Param('clientID') clientID: number
+  @Get('/v1/archive/pageHistorical/')
+  async getPageHistorical(
+    @QueryParams() params: GetHistoricalParams
     ) {
-    // const data = await this.archiveRepository.getHistorical(pageID, clientID)
-    // return data
+    const { clientID, pageID, startDate, endDate, type } = params
+    const data = await this.archiveRepository.getPageHistorical({
+      clientID: parseInt(clientID, 10),
+      pageID: parseInt(pageID, 10),
+      startDate: new Date(startDate),
+      endDate: new Date(endDate),
+      type
+    })
+    return data
   }
 
   @OnUndefined(204)

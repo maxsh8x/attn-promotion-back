@@ -59,7 +59,12 @@ export const convertToDate = (
     .format('DD-MM-YYYY')
 }
 
-export const getViewsProjections = (startDate: Date, endDate: Date) => ({
+export const getViewsProjections = (
+  startDate: Date,
+  endDate: Date,
+  fieldStart: string,
+  fieldEnd: string
+) => ({
   views: {
     $reduce: {
       input: {
@@ -68,8 +73,8 @@ export const getViewsProjections = (startDate: Date, endDate: Date) => ({
           as: 'item',
           cond: {
             $and: [
-              { $gte: ['$$item.date', '$meta.startDate'] },
-              { $lte: ['$$item.date', '$meta.endDate'] }
+              { $gte: ['$$item.date', fieldStart] },
+              { $lte: ['$$item.date', endDate] }
             ]
           }
         }
@@ -132,7 +137,7 @@ export const getCostPipeline = (params: IGetCostPipelineParams) => {
         value: 1
       }
     },
-    { $sort : { primary : 1, secondary: 1 } }
+    { $sort: { primary: 1, secondary: 1 } }
   ]
   return pipeline
 }

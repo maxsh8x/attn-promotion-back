@@ -392,7 +392,12 @@ export class PageRepository {
           maxViews: '$meta.maxViews',
           startDate: '$meta.startDate',
           endDate: '$meta.endDate',
-          ...getViewsProjections(startDate, endDate)
+          ...getViewsProjections(
+            startDate,
+            endDate,
+            '$meta.startDate',
+            '$meta.endDate'
+          )
         }
       }
     ])
