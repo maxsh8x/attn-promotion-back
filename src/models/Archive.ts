@@ -1,7 +1,6 @@
 import * as mongoose from 'mongoose'
 
 export interface IData {
-  _id: number
   page: number
   client: number
   minViews: number
@@ -12,18 +11,14 @@ export interface IData {
 
 export const Data = new mongoose.Schema(
   {
-    _id: Number,
     page: { type: Number, ref: 'Page', required: true },
     client: { type: Number, ref: 'Client', required: true },
     minViews: { type: Number, required: true },
     maxViews: { type: Number, required: true },
     startDate: { type: Date, required: true },
     endDate: { type: Date, required: true },
-    costPerClick: { type: Number, required: true }
-  },
-  {
-    _id: false,
-    timestamps: true
+    costPerClick: { type: Number, required: true },
+    archivedAt: { type: Date, default: Date.now }
   }
 )
 

@@ -2,6 +2,7 @@ import { Service } from 'typedi'
 import { Page } from '../models/Page'
 import { Archive } from '../models/Archive'
 import { QUESTION_VARIANT_TYPE } from '../constants'
+import { getViewsProjections } from '../utils/metrics';
 
 const Fawn = require('fawn')
 
@@ -386,42 +387,7 @@ export class PageRepository {
           maxViews: '$meta.maxViews',
           startDate: '$meta.startDate',
           endDate: '$meta.endDate',
-          views: {
-            $reduce: {
-              input: {
-                $filter: {
-                  input: '$metrics',
-                  as: 'item',
-                  cond: {
-                    $and: [
-                      { $gte: ['$$item.date', '$meta.startDate'] },
-                      { $lte: ['$$item.date', '$meta.endDate'] }
-                    ]
-                  }
-                }
-              },
-              initialValue: 0,
-              in: { $add: ['$$value', '$$this.pageviews'] }
-            }
-          },
-          viewsPeriod: {
-            $reduce: {
-              input: {
-                $filter: {
-                  input: '$metrics',
-                  as: 'item',
-                  cond: {
-                    $and: [
-                      { $gte: ['$$item.date', startDate] },
-                      { $lte: ['$$item.date', endDate] }
-                    ]
-                  }
-                }
-              },
-              initialValue: 0,
-              in: { $add: ['$$value', '$$this.pageviews'] }
-            }
-          }
+          ...getViewsProjections(startDate, endDate)
         }
       }
     ])
@@ -438,7 +404,6 @@ export class PageRepository {
     return Page
       .distinct('meta.client', { _id: pageID })
   }
-
 
   getClientsTotal(params: IGetClientsTotal) {
     const { startDate, endDate, clients, type } = params

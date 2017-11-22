@@ -1,33 +1,89 @@
 import { Service } from 'typedi'
 import { Archive } from '../models/Archive'
+import { getViewsProjections } from '../utils/metrics';
+
+type types = 'all' | 'group' | 'individual'
+
+interface IGetArchiveBase {
+  clientID: number
+  startDate: Date
+  endDate: Date
+  type: types
+}
+
+interface IGetLatest extends IGetArchiveBase {
+  offset: number
+  limit: number
+}
+
+interface IGetHistorical extends IGetArchiveBase {
+  pageID: number
+}
 
 @Service()
 export class ArchiveRepository {
-  getArchive(page: number, client: number) {
-    return Archive
-      .find({ page, client }, 'minViews maxViews startDate endDate costPerClick')
-      .lean()
-      .exec()
-      .then((docs: any) => {
-        for (let i = 0; i < docs.length; i++) {
-          docs[i].id = docs[i]._id.toString()
-          delete docs[i]._id
+  getLatest(params: IGetLatest): any {
+    const { clientID: client, startDate, endDate, offset, limit } = params
+    const pagination = []
+    if (!([offset, limit]).every(item => isNaN(item))) {
+      pagination.push(...[
+        { $skip: offset },
+        { $limit: limit }
+      ])
+    }
+    const pipeline: any = [
+      { $match: { client } },
+      { $sort: { 'archivedAt': -1 } },
+      {
+        $group: {
+          _id: {
+            page: '$page',
+            client: '$client'
+          },
+          meta: { $first: '$$ROOT' }
         }
-        return docs
-      })
-  }
-  
-  getLatest(): any {
-    return Archive
-    .find()
-    .lean()
-    .exec()
+      },
+      ...pagination,
+      {
+        $graphLookup: {
+          from: 'metrics',
+          startWith: '$_id.page',
+          connectFromField: 'page',
+          connectToField: 'page',
+          as: 'metrics',
+          restrictSearchWithMatch: {
+            type: 'total'
+          }
+        }
+      },
+      {
+        $project: {
+          _id: '$meta.page',
+          startDate: '$meta.startDate',
+          endDate: '$meta.endDate',
+          costPerClick: '$meta.costPerClick',
+          maxViews: '$meta.maxViews',
+          minViews: '$meta.minViews',
+          ...getViewsProjections(startDate, endDate)
+        }
+      }
+    ]
+    return Promise.all([
+      Archive
+        .aggregate(pipeline)
+        .exec(),
+      Archive.count({ client })
+    ])
   }
 
-  getHistorical(): any {
+  getHistorical(params: IGetHistorical): any {
+    const { clientID: client, pageID: page } = params
+
     return Archive
-    .find()
-    .lean()
-    .exec()
+      .find({ page, client })
+      // .sort({ 'archivedAt': -1 })
+      // .skip(1)
+      // .lean()
+      .exec()
   }
 }
