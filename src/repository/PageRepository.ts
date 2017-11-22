@@ -103,7 +103,7 @@ export class PageRepository {
       )
   }
 
-  archiveMeta(page: number, client: number) {
+  metaToArchive(page: number, client: number) {
     return Page
       .findById(page, {
         url: 1,
@@ -120,6 +120,29 @@ export class PageRepository {
             ...doc.meta[0],
             page
           }))
+          .run({ useMongoose: true })
+      )
+  }
+
+  archiveToMeta(archiveID: string) {
+    return Archive
+      .findById(archiveID)
+      .populate('pageData')
+      .then((doc: any) =>
+        Fawn.Task()
+          .update('pages', { url: doc.pageData.url }, {
+            $push: {
+              meta: {
+                startDate: doc.startDate,
+                endDate: doc.endDate,
+                costPerClick: doc.costPerClick,
+                maxViews: doc.maxViews,
+                minViews: doc.minViews,
+                client: doc.client
+              }
+            }
+          })
+          .remove(doc)
           .run({ useMongoose: true })
       )
   }

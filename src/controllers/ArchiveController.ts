@@ -7,7 +7,8 @@ import {
   OnUndefined,
   Post,
   Body,
-  QueryParams
+  QueryParams,
+  Delete
 } from 'routing-controllers'
 import {
   IsPositive,
@@ -97,10 +98,18 @@ export class ClientController {
 
   @OnUndefined(204)
   @Post('/v1/archive')
-  async toArchieve(
+  async metaToArchive(
     @Body() params: AchieveParams
     ) {
     const { pageID, clientID } = params
-    await this.pageRepository.archiveMeta(pageID, clientID)
+    await this.pageRepository.metaToArchive(pageID, clientID)
+  }
+
+  @OnUndefined(204)
+  @Delete('/v1/archive/:archiveID')
+  async archiveToMeta(
+    @Param('archiveID') archiveID: string
+    ) {
+    await this.pageRepository.archiveToMeta(archiveID)
   }
 }
