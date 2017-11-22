@@ -193,32 +193,13 @@ export class MetricsRepository {
       }
     }
 
-    const groupStageBase = {
-      _id: {
-        year: { $year: '$date' },
-        month: { $month: '$date' },
-        day: { $dayOfMonth: '$date' }
-      },
-      date: { $first: '$date' }
-    }
-
-    const projectStage = {
-      id: { $dateToString: { format: '%Y-%m-%d', date: '$date' } }
-    }
-
     return Promise.all([
       Metrics.aggregate([
-        { $match: matchStageBase },
-        {
-          $group: {
-            ...groupStageBase,
-            views: { $sum: '$pageviews' }
-          }
-        },
+        { $match: { ...matchStageBase, type: 'total' } },
         {
           $project: {
-            ...projectStage,
-            views: 1
+            id: { $dateToString: { format: '%Y-%m-%d', date: '$date' } },
+            views: '$pageviews'
           }
         }
       ]).exec(),
@@ -226,14 +207,14 @@ export class MetricsRepository {
         { $match: matchStageBase },
         {
           $group: {
-            ...groupStageBase,
+            _id: '$date',
             cost: { $sum: { $cond: [{ $eq: ['$type', 'cost'] }, '$value', 0] } },
             clicks: { $sum: { $cond: [{ $eq: ['$type', 'clicks'] }, '$value', 0] } }
           }
         },
         {
           $project: {
-            ...projectStage,
+            id: { $dateToString: { format: '%Y-%m-%d', date: '$_id' } },
             cost: 1,
             clicks: 1
           }
