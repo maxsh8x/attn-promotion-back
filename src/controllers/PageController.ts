@@ -218,9 +218,9 @@ export class PageController {
     const url = getStartURLPath(rawURL)
     const title = await getTitle(rawURL)
     const pageData = await this.pageRepository.getPageClientByURL(url, client)
-    const { _id: page } = pageData
-    if (!page) {
-      await this.pageRepository.create({
+    let page: number | null = null
+    if (!pageData) {
+      const createdPage = await this.pageRepository.create({
         url,
         title,
         parent,
@@ -234,7 +234,9 @@ export class PageController {
           endDate
         }]
       })
-    } else if (page && !pageData.meta) {
+      page = createdPage._id
+    } else if (pageData && pageData.meta.length === 0) {
+      page = pageData._id
       await this.pageRepository.bindClients({
         page,
         minViews,

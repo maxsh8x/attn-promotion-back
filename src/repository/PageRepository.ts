@@ -167,10 +167,7 @@ export class PageRepository {
 
   getPageClientByURL(url: string, client: number): any {
     return Page
-      .findOne(
-      { url },
-      { meta: { $elemMatch: { client } } }
-      )
+      .findOne({ url })
       .lean()
       .exec()
   }
