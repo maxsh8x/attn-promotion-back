@@ -74,7 +74,7 @@ export const getViewsProjections = (
           cond: {
             $and: [
               { $gte: ['$$item.date', fieldStart] },
-              { $lte: ['$$item.date', endDate] }
+              { $lte: ['$$item.date', fieldEnd] }
             ]
           }
         }
