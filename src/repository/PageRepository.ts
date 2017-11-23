@@ -86,14 +86,16 @@ export class PageRepository {
           for (let i = 0; i < activePages.meta.length; i += 1) {
             campaigns.push({
               startDate: activePages.meta[i].startDate,
-              endDate: activePages.meta[i].endDate
+              endDate: activePages.meta[i].endDate,
+              archived: false
             })
           }
         }
         for (let i = 0; i < archivePages.length; i++) {
           campaigns.push({
             startDate: archivePages[i].startDate,
-            endDate: archivePages[i].endDate
+            endDate: archivePages[i].endDate,
+            archived: true
           })
         }
         campaigns.sort(
