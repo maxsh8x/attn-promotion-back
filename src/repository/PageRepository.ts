@@ -3,6 +3,7 @@ import { Page } from '../models/Page'
 import { Archive } from '../models/Archive'
 import { QUESTION_VARIANT_TYPE } from '../constants'
 import { getViewsProjections } from '../utils/metrics';
+import { Error } from 'mongoose';
 
 const Fawn = require('fawn')
 
@@ -129,7 +130,23 @@ export class PageRepository {
       .findById(archiveID)
       .populate('pageData')
       .then((doc: any) =>
-        Fawn.Task()
+        Promise.all([
+          Page
+            .findById(doc.page)
+            .lean()
+            .exec(),
+          Promise.resolve(doc)
+        ]))
+      .then(([page, doc]: any) => {
+        if (page.type === 'individual' && page.meta.length > 0) {
+          throw new Error('ALREADY_EXISTS')
+        }
+        if (page.type === 'group' && page.meta.find(
+          (item: any) => item.client === doc.client)
+        ) {
+          throw new Error('ALREADY_EXISTS')
+        }
+        return Fawn.Task()
           .update('pages', { url: doc.pageData.url }, {
             $push: {
               meta: {
@@ -144,6 +161,7 @@ export class PageRepository {
           })
           .remove(doc)
           .run({ useMongoose: true })
+      }
       )
   }
 
