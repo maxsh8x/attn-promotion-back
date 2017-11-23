@@ -19,6 +19,7 @@ import {
 } from 'class-validator'
 import { PageRepository } from '../repository/PageRepository'
 import { ArchiveRepository } from '../repository/ArchiveRepository'
+import { transformObjectID } from '../utils/data'
 
 export class AchieveParams {
   @IsPositive()
@@ -77,6 +78,7 @@ export class ClientController {
       endDate: new Date(endDate),
       type
     })
+    transformObjectID(pagesData, 'archiveID')
     return { pagesData, total }
   }
 

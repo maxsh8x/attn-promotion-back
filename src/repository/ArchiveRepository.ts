@@ -81,6 +81,7 @@ export class ArchiveRepository {
       {
         $project: {
           _id: '$meta.page',
+          archiveID: '$meta._id',
           url: '$page.url',
           title: '$page.title',
           type: '$page.type',
