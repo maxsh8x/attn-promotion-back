@@ -95,6 +95,7 @@ export class ClientController {
       endDate: new Date(endDate),
       type
     })
+    transformObjectID(data, 'id')
     return data
   }
 

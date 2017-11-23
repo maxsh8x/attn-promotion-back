@@ -146,7 +146,8 @@ export class ArchiveRepository {
       },
       {
         $project: {
-          _id: '$meta.page',
+          _id: '$page',
+          id: '$_id',
           startDate: '$startDate',
           endDate: '$endDate',
           costPerClick: '$costPerClick',
