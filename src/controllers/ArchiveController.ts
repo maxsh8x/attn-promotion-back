@@ -8,7 +8,8 @@ import {
   Post,
   Body,
   QueryParams,
-  Delete
+  Delete,
+  BadRequestError,
 } from 'routing-controllers'
 import {
   IsPositive,
@@ -113,6 +114,9 @@ export class ClientController {
   async archiveToMeta(
     @Param('archiveID') archiveID: string
     ) {
-    await this.pageRepository.archiveToMeta(archiveID)
+    const result = await this.pageRepository.archiveToMeta(archiveID)
+    if (!result) {
+      throw new BadRequestError('ALREADY_EXISTS')
+    }
   }
 }

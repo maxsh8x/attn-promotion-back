@@ -139,12 +139,12 @@ export class PageRepository {
         ]))
       .then(([page, doc]: any) => {
         if (page.type === 'individual' && page.meta.length > 0) {
-          throw new Error('ALREADY_EXISTS')
+          return null
         }
         if (page.type === 'group' && page.meta.find(
           (item: any) => item.client === doc.client)
         ) {
-          throw new Error('ALREADY_EXISTS')
+          return null
         }
         return Fawn.Task()
           .update('pages', { url: doc.pageData.url }, {
