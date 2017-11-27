@@ -59,6 +59,30 @@ export class MetricsRepository {
     }
   }
 
+  async getPageData(pageID: number) {
+    const pageData = await this.pageRepository.getOneWithClients(pageID)
+    const { url, type } = pageData
+    let counterID: number | null = null
+    if (type === 'group') {
+      counterID = pageData.counterID
+    } else {
+      const clientData = await this.clientRepository.getOne(pageData.meta[0].client)
+      counterID = clientData.counterID
+    }
+    return { url, counterID }
+  }
+
+  async getMetricsPeriodData(pageID: number, startDate: string, endDate: string) {
+    const { url, counterID } = await this.getPageData(pageID)
+    const data = await this.getYMetricsPeriod(
+      url,
+      counterID,
+      startDate,
+      endDate
+    )
+    return data
+  }
+
   async updateMetrics(pageID: number, startDate: string, endDate: string) {
     const getYesterday = () => moment().add(-1, 'days').format('YYYY-MM-DD')
     const now = new Date()
@@ -69,19 +93,57 @@ export class MetricsRepository {
     if (new Date(endDate) >= now) {
       endDate = getYesterday()
     }
-    const pageData = await this.pageRepository.getOneWithClients(pageID)
-    const { url, type } = pageData
-    let counterID: number | null = null
-    if (type === 'group') {
-      counterID = pageData.counterID
-    } else {
-      const clientData = await this.clientRepository.getOne(pageData.meta[0].client)
-      counterID = clientData.counterID
-    }
+    const { url, counterID } = await this.getPageData(pageID)
     const data = await this.getYMetricsByDay(url, pageID, counterID, startDate, endDate)
     if (data.length > 0) {
       await this.createMetrics(data)
     }
+  }
+
+  async getYMetricsPeriod(startURLPath: string, counterID: number, startDate: string, endDate: string) {
+    const basicParams = {
+      ids: counterID,
+      date1: startDate,
+      date2: endDate,
+      filters: `ym:s:startURLPath=='${startURLPath}'`,
+      metrics: 'ym:s:pageviews,ym:s:pageDepth,ym:s:avgVisitDurationSeconds,ym:s:bounceRate'
+    }
+    const networks = {
+      ...basicParams,
+      dimensions: 'ym:s:UTMSource,ym:s:startURLPath'
+    }
+    const meta = {
+      ...basicParams,
+      dimensions: 'ym:s:<attribution>TrafficSource'
+    }
+    // TODO: 404 if counterID not found
+    const { data: networksData } = await axios().get('', { params: networks })
+    const { data: metaData } = await axios().get('', { params: meta })
+    const { data: total } = await axios().get('', { params: basicParams })
+
+    const data: any = {}
+
+    const extractData = ([dataSource, fieldName]: [any, string]) =>
+      dataSource.data.forEach((item: any) => {
+        if (fieldName !== 'total') {
+          const sourceName = item.dimensions[0][fieldName]
+          if (allSources.indexOf(sourceName) !== -1) {
+            data[sourceName] = item.metrics
+          }
+        } else {
+          data['total'] = item.metrics
+        }
+      })
+
+    const sourcesData = [
+      [networksData, 'name'],
+      [metaData, 'id'],
+      [total, 'total']
+    ]
+
+    sourcesData.forEach(extractData)
+
+    return data
   }
 
   async getYMetricsByDay(

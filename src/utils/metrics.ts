@@ -24,7 +24,7 @@ export const totalByPage = (data: any) => {
   return metricsMap
 }
 
-export const byMetric = (data: any[]) => {
+export const byMetricDay = (data: any[]) => {
   return metricFields.map((metric: any) => {
     const item: any = { metric, sources: {}, metagroups: {} }
     for (let i = 0; i < data.length; i++) {
@@ -32,6 +32,20 @@ export const byMetric = (data: any[]) => {
         item['sources'][data[i]['type']] = data[i][metric]
       } else {
         item['metagroups'][data[i]['type']] = data[i][metric]
+      }
+    }
+    return item
+  })
+}
+
+export const byMetricPeriod = (data: any) => {
+  return metricFields.map((metric: any, i: number) => {
+    const item: any = { metric, sources: {}, metagroups: {} }
+    for (let prop in data) {
+      if (sources.indexOf(prop) !== -1) {
+        item['sources'][prop] = data[prop][i]
+      } else {
+        item['metagroups'][prop] = data[prop][i]
       }
     }
     return item

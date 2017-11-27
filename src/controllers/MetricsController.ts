@@ -20,7 +20,7 @@ import { MetricsRepository } from '../repository/MetricsRepository'
 import { PageRepository } from '../repository/PageRepository'
 import { InputRepository } from '../repository/InputRepository'
 import { ClientRepository } from '../repository/ClientRepository'
-import { byMetric, convertToDate } from '../utils/metrics'
+import { byMetricDay, byMetricPeriod, convertToDate } from '../utils/metrics'
 import { CHART_INTERVAL_TYPE, CHART_INTERVAL_ARRAY } from '../constants'
 
 export class UpdateMetricsParams {
@@ -34,9 +34,20 @@ export class UpdateMetricsParams {
   endDate: string
 }
 
-export class GetMetricsParams {
+export class GetMetricsDayParams {
   @IsISO8601()
   yDate: string
+
+  @IsNumberString()
+  pageID: string
+}
+
+export class GetMetricsPeriodParams {
+  @IsISO8601()
+  startDate: string
+
+  @IsISO8601()
+  endDate: string
 
   @IsNumberString()
   pageID: string
@@ -104,13 +115,28 @@ export class MetricsController {
   }
 
   @Authorized(['root', 'buchhalter'])
-  @Get('/v1/metrics')
-  async getMetrics(
-    @QueryParams() params: GetMetricsParams
+  @Get('/v1/metrics/day')
+  async getMetricsByDay(
+    @QueryParams() params: GetMetricsDayParams
     ) {
     const { yDate, pageID } = params
     const data = await this.metricsRepository.getMetrics(yDate, parseInt(pageID, 10))
-    const result = byMetric(data)
+    const result = byMetricDay(data)
+    return result
+  }
+
+  @Authorized(['root', 'buchhalter'])
+  @Get('/v1/metrics/period')
+  async getMetricsPeriod(
+    @QueryParams() params: GetMetricsPeriodParams
+    ) {
+    const { startDate, endDate, pageID } = params
+    const data = await this.metricsRepository.getMetricsPeriodData(
+      parseInt(pageID, 10),
+      startDate,
+      endDate
+    )
+    const result = byMetricPeriod(data)
     return result
   }
 
