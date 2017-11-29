@@ -56,6 +56,9 @@ export class BaseCreatorParams {
   @IsPositive()
   maxViews: number
 
+  @IsOptional()
+  targetClickCost: number
+
   @IsPositive()
   costPerClick: number
 
@@ -211,6 +214,7 @@ export class PageController {
       parent,
       minViews,
       maxViews,
+      targetClickCost,
       costPerClick,
       startDate,
       endDate
@@ -229,6 +233,7 @@ export class PageController {
           client,
           minViews,
           maxViews,
+          targetClickCost,
           costPerClick,
           startDate,
           endDate
@@ -241,6 +246,7 @@ export class PageController {
         page,
         minViews,
         maxViews,
+        targetClickCost,
         costPerClick,
         clients: [client],
         startDate: new Date(startDate),
@@ -267,7 +273,7 @@ export class PageController {
   async getReport(
     @Param('pageID') pageID: number,
     @Param('clientID') clientID: number
-  ) {
+    ) {
     const data = await this.pageRepository.getReportCampaigns(pageID, clientID)
     return data
   }
@@ -396,7 +402,16 @@ export class PageController {
   async bindClients(
     @Body() params: BindClientsParams
     ) {
-    const { page, clients, minViews, maxViews, costPerClick, startDate, endDate } = params
+    const {
+      page,
+      clients,
+      minViews,
+      maxViews,
+      targetClickCost,
+      costPerClick,
+      startDate,
+      endDate
+    } = params
 
     const bindPage = await this.pageRepository.getBindPage(page, clients)
     if (!(bindPage)) {
@@ -408,6 +423,7 @@ export class PageController {
       clients,
       minViews,
       maxViews,
+      targetClickCost,
       costPerClick,
       startDate: new Date(startDate),
       endDate: new Date(endDate)

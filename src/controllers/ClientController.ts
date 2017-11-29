@@ -99,6 +99,9 @@ export class BindPageParams {
   @IsPositive()
   maxViews: number
 
+  @IsOptional()
+  targetClickCost: number
+
   @IsISO8601()
   startDate: string
 
@@ -277,6 +280,7 @@ export class ClientController {
       client,
       minViews,
       maxViews,
+      targetClickCost,
       startDate,
       endDate
     } = params
@@ -285,6 +289,7 @@ export class ClientController {
       client,
       minViews,
       maxViews,
+      targetClickCost,
       startDate,
       endDate
     })

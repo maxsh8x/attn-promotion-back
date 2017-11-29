@@ -89,6 +89,7 @@ export class ArchiveRepository {
           startDate: '$meta.startDate',
           endDate: '$meta.endDate',
           costPerClick: '$meta.costPerClick',
+          targetClickCost: '$meta.targetClickCost',
           maxViews: '$meta.maxViews',
           minViews: '$meta.minViews',
           ...getViewsProjections(
@@ -151,6 +152,7 @@ export class ArchiveRepository {
           startDate: '$startDate',
           endDate: '$endDate',
           costPerClick: '$costPerClick',
+          targetClickCost: '$targetClickCost',
           maxViews: '$maxViews',
           minViews: '$minViews',
           ...getViewsProjections(

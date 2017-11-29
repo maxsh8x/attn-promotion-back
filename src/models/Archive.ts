@@ -6,6 +6,7 @@ export interface IData {
   client: number
   minViews: number
   maxViews: number
+  targetClickCost: number
   startDate: Date
   endDate: Date
   costPerClick: number
@@ -19,6 +20,7 @@ export const Data = new mongoose.Schema(
     client: { type: Number, ref: 'Client', required: true },
     minViews: { type: Number, required: true },
     maxViews: { type: Number, required: true },
+    targetClickCost: { type: Number, required: false },
     startDate: { type: Date, required: true },
     endDate: { type: Date, required: true },
     costPerClick: { type: Number, required: true },

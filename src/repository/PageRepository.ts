@@ -46,6 +46,7 @@ interface IBindClientParams {
   clients: number[]
   minViews: number
   maxViews: number
+  targetClickCost: number
   costPerClick: number
   startDate: Date
   endDate: Date
@@ -155,6 +156,7 @@ export class PageRepository {
                 startDate: doc.startDate,
                 endDate: doc.endDate,
                 costPerClick: doc.costPerClick,
+                targetClickCost: doc.targetClickCost,
                 maxViews: doc.maxViews,
                 minViews: doc.minViews,
                 client: doc.client
@@ -328,6 +330,7 @@ export class PageRepository {
           endDate: '$meta.endDate',
           startDate: '$meta.startDate',
           costPerClick: '$meta.costPerClick',
+          targetClickCost: '$meta.targetClickCost',
           maxViews: '$meta.maxViews',
           minViews: '$meta.minViews',
           total: '$total',
@@ -428,6 +431,7 @@ export class PageRepository {
         $project: {
           ...fields,
           costPerClick: '$meta.costPerClick',
+          targetClickCost: '$meta.targetClickCost',
           minViews: '$meta.minViews',
           maxViews: '$meta.maxViews',
           startDate: '$meta.startDate',
@@ -611,6 +615,7 @@ export class PageRepository {
       clients,
       minViews,
       maxViews,
+      targetClickCost,
       costPerClick,
       startDate,
       endDate
@@ -619,6 +624,7 @@ export class PageRepository {
       client,
       minViews,
       maxViews,
+      targetClickCost,
       costPerClick,
       startDate,
       endDate

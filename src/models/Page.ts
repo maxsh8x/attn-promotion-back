@@ -7,6 +7,7 @@ export interface IMeta {
   client: number
   minViews: number
   maxViews: number
+  targetClickCost: number
   startDate: Date
   endDate: Date
 }
@@ -27,6 +28,7 @@ export const Meta = new mongoose.Schema(
     maxViews: { type: Number, required: true },
     startDate: { type: Date, required: true },
     endDate: { type: Date, required: true },
+    targetClickCost: { type: Number, required: false },
     costPerClick: { type: Number, required: true }
   },
   {
