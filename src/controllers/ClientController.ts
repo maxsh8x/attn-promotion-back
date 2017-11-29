@@ -20,7 +20,8 @@ import {
   IsISO8601,
   IsPositive,
   IsOptional,
-  IsIn
+  IsIn,
+  ValidateIf
 } from 'class-validator'
 import { ClientRepository } from '../repository/ClientRepository'
 import { PageRepository } from '../repository/PageRepository'
@@ -107,6 +108,16 @@ export class BindPageParams {
 
   @IsISO8601()
   endDate: string
+}
+
+export class UpdateCampaign {
+  @ValidateIf(o => typeof(o.costPerClick) !== 'undefined')
+  @IsPositive()
+  costPerClick: number
+
+  @ValidateIf(o => typeof(o.targetClickCost) !== 'undefined')
+  @IsPositive()
+  targetClickCost: number
 }
 
 @Service()
@@ -200,6 +211,25 @@ export class ClientController {
     })
     const total = clientsData.length > 0 ? clientsData[0].total : 0
     return { clientsData, total }
+  }
+
+  @OnUndefined(204)
+  @Authorized(['root'])
+  @Patch('/v1/client/:clientID/page/:pageID')
+  async updateCampaign(
+    @Param('clientID') clientID: number,
+    @Param('pageID') pageID: number,
+    @Body() params: UpdateCampaign
+  ) {
+    const allowedFields = ['costPerClick', 'targetClickCost']
+    for (let param in params) {
+      if (allowedFields.indexOf(param) === -1) {
+        throw new BadRequestError('INVALID_FIELD')
+      }
+    }
+    if (Object.keys(params).length > 0) {
+      await this.pageRepository.updateCampaign(clientID, pageID, params)
+    }
   }
 
   @Authorized(['root', 'buchhalter', 'manager'])

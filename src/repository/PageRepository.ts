@@ -67,6 +67,17 @@ export class PageRepository {
     return Page.create(params)
   }
 
+  updateCampaign(clientID: number, pageID: number, params: any) {
+    const updateQuery: any = {}
+    for (let param in params) {
+      updateQuery[`meta.$.${param}`] = params[param]
+    }
+    return Page.findOneAndUpdate(
+      { '_id': pageID, 'meta.client': clientID },
+      { $set: updateQuery }
+    )
+  }
+
   getReportCampaigns(page: number, client: number) {
     return Promise.all([
       Page
