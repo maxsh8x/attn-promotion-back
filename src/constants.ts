@@ -11,3 +11,5 @@ export type CHART_INTERVAL_TYPE = 'days' | 'months'
 
 export const QUESTION_VARIANT_ARRAY = ['group', 'individual']
 export type QUESTION_VARIANT_TYPE = 'group' | 'individual'
+
+export type CLIENT_TABS = 'all' | 'group' | 'individual'

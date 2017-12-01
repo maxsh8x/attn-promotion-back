@@ -1,9 +1,8 @@
 import { Service } from 'typedi'
 import { Page } from '../models/Page'
 import { Archive } from '../models/Archive'
-import { QUESTION_VARIANT_TYPE } from '../constants'
-import { getViewsProjections } from '../utils/metrics';
-import { Error } from 'mongoose';
+import { QUESTION_VARIANT_TYPE, CLIENT_TABS } from '../constants'
+import { getViewsProjections } from '../utils/metrics'
 
 const Fawn = require('fawn')
 
@@ -23,22 +22,20 @@ interface IGetPageClientsParams {
   role: string
 }
 
-type types = 'all' | 'group' | 'individual'
-
 interface IGetClientsPages {
   offset: number
   limit: number
   clientID: number
   startDate: Date
   endDate: Date
-  type: types
+  type: CLIENT_TABS
 }
 
 interface IGetClientsTotal {
   startDate: Date
   endDate: Date
   clients: number[]
-  type: types
+  type: CLIENT_TABS
 }
 
 interface IBindClientParams {
