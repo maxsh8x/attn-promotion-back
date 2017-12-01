@@ -4,7 +4,6 @@ import { Client } from '../models/Client'
 interface IGetAll {
   limit: number
   offset: number
-  filter: string
   clients: number[]
   role: string
 }
@@ -54,11 +53,8 @@ export class ClientRepository {
   }
 
   getAll(params: IGetAll): any {
-    const { limit, offset, filter, clients, role } = params
+    const { limit, offset, clients, role } = params
     const query: any = {}
-    if (filter) {
-      query.$text = { $search: filter }
-    }
     if (clients.length > 0 || role === 'manager') {
       query._id = { $in: clients }
     }
@@ -73,8 +69,6 @@ export class ClientRepository {
         .count(query)
     ])
   }
-
-
 
   searchFulltext(params: ISearchFulltext): any {
     const { filter, limit, role, clients } = params

@@ -140,7 +140,7 @@ export class MetricsController {
     return result
   }
 
-  @Authorized(['root', 'buchhalter'])
+  @Authorized(['root', 'buchhalter', 'manager'])
   @Get('/v1/metrics/report')
   async getReport(
     @QueryParams() params: ReportParams

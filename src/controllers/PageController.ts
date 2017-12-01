@@ -274,7 +274,7 @@ export class PageController {
     return { title }
   }
 
-  @Authorized(['root', 'buchhalter'])
+  @Authorized(['root', 'buchhalter', 'manager'])
   @Get('/v1/page/:pageID/report/:clientID')
   async getReport(
     @Param('pageID') pageID: number,

@@ -75,6 +75,10 @@ export class PageRepository {
     )
   }
 
+  getClients(type: string) {
+    return Page.distinct('meta.client', { type })
+  }
+
   getReportCampaigns(page: number, client: number) {
     return Promise.all([
       Page

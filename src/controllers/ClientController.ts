@@ -111,11 +111,11 @@ export class BindPageParams {
 }
 
 export class UpdateCampaign {
-  @ValidateIf(o => typeof(o.costPerClick) !== 'undefined')
+  @ValidateIf(o => typeof (o.costPerClick) !== 'undefined')
   @IsPositive()
   costPerClick: number
 
-  @ValidateIf(o => typeof(o.targetClickCost) !== 'undefined')
+  @ValidateIf(o => typeof (o.targetClickCost) !== 'undefined')
   @IsPositive()
   targetClickCost: number
 }
@@ -137,11 +137,19 @@ export class ClientController {
     @CurrentUser({ required: true }) userData: any
     ) {
     const { userID, role } = userData
-    const { filter, startDate, endDate, user, limit, offset, type } = params
-    const clients: number[] = []
+    const { startDate, endDate, user, limit, offset, type } = params
+    let clients: number[] = []
+    if (type !== 'all') {
+      const clientWithQuestions = await this.pageRepository.getClients(type)
+      clients.push(...clientWithQuestions)
+    }
     if (role === 'manager') {
       const userData = await this.userRepository.getOne(userID)
-      clients.push(...userData.clients)
+      if (type !== 'all') {
+        clients = clients.filter(n => userData.clients.includes(n))
+      } else {
+        clients.push(...userData.clients)
+      }
     }
     if (user && role !== 'manager') {
       const userData = await this.userRepository.getOne(parseInt(user, 10))
@@ -156,13 +164,14 @@ export class ClientController {
         clients.push(...userData.clients)
       }
     }
+
     const [clientsData, total]: [any, number] = await this.clientRepository.getAll({
       limit: parseInt(limit, 10),
       offset: parseInt(offset, 10),
-      filter,
       clients,
       role
     })
+
     const totalData = await this.pageRepository.getClientsTotal(
       {
         startDate: new Date(startDate),
@@ -220,7 +229,7 @@ export class ClientController {
     @Param('clientID') clientID: number,
     @Param('pageID') pageID: number,
     @Body() params: UpdateCampaign
-  ) {
+    ) {
     const allowedFields = ['costPerClick', 'targetClickCost']
     for (let param in params) {
       if (allowedFields.indexOf(param) === -1) {
@@ -236,7 +245,7 @@ export class ClientController {
   @Get('/v1/client/pages/:clientID')
   async getClientPages(
     @Param('clientID') clientID: number
-  ) {
+    ) {
     const data = await this.pageRepository.getClientsPages(clientID)
     return data
   }
@@ -331,7 +340,7 @@ export class ClientController {
   async updateUser(
     @Param('clientID') clientID: number,
     @Body() params: any
-  ) {
+    ) {
     const allowedFields = ['name', 'brand', 'vatin']
     for (let param in params) {
       if (allowedFields.indexOf(param) === -1) {
