@@ -136,7 +136,7 @@ export class MetricsController {
       startDate,
       endDate
     )
-    const result = byMetricPeriod(data)
+    const result = byMetricPeriod(data || {})
     return result
   }
 

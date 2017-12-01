@@ -66,14 +66,22 @@ export class MetricsRepository {
     if (type === 'group') {
       counterID = pageData.counterID
     } else {
-      const clientData = await this.clientRepository.getOne(pageData.meta[0].client)
-      counterID = clientData.counterID
+      if (type === 'individual' && pageData.meta.length > 0) {
+        const clientData = await this.clientRepository.getOne(pageData.meta[0].client)
+        counterID = clientData.counterID
+      } else {
+        return null
+      }
     }
     return { url, counterID }
   }
 
   async getMetricsPeriodData(pageID: number, startDate: string, endDate: string) {
-    const { url, counterID } = await this.getPageData(pageID)
+    const pageData = await this.getPageData(pageID)
+    if (pageData === null) {
+      return null
+    }
+    const { url, counterID } = pageData
     const data = await this.getYMetricsPeriod(
       url,
       counterID,
