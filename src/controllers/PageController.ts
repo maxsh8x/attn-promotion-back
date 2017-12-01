@@ -314,11 +314,18 @@ export class PageController {
     })
     const inputDay = await this.inputRepository.getByPageIDs(
       pages.map((item: any) => item._id),
-      yDate
+      new Date(yDate),
+      new Date(yDate)
+    )
+    const inputPeriod = await this.inputRepository.getByPageIDs(
+      pages.map((item: any) => item._id),
+      new Date(startDate),
+      new Date(endDate)
     )
     return {
       pages,
       inputDay,
+      inputPeriod,
       sources,
       activePages,
       inactivePages

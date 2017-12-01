@@ -29,11 +29,18 @@ export class InputRepository {
       .exec()
   }
 
-  getByPageIDs(pageIDs: number[], yDate: string): any {
-    const date = new Date(yDate)
+  getByPageIDs(pageIDs: number[], startDate: Date, endDate: Date): any {
     // TODO: $max
     const pipeline = [
-      { $match: { date, page: { $in: pageIDs } } },
+      {
+        $match: {
+          date: {
+            $gte: startDate,
+            $lte: endDate
+          },
+          page: { $in: pageIDs }
+        }
+      },
       {
         $group: {
           _id: { page: '$page', source: '$source' },

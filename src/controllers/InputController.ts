@@ -1,16 +1,19 @@
 import { Service } from 'typedi'
 import {
+  Get,
   Post,
   Body,
   JsonController,
   Authorized,
-  OnUndefined
+  OnUndefined,
+  QueryParams
 } from 'routing-controllers'
 import {
   IsPositive,
   IsString,
   IsNumber,
-  IsISO8601
+  IsISO8601,
+  IsNumberString
 } from 'class-validator'
 import { InputRepository } from '../repository/InputRepository'
 
@@ -39,12 +42,42 @@ export class GetInputParams {
   pageID: number
 }
 
+export class GetPageInputParams {
+  @IsNumberString()
+  pageID: string
+
+  @IsISO8601()
+  startDate: string
+
+  @IsISO8601()
+  endDate: string
+}
+
 @Service()
 @JsonController()
 export class MetricsController {
   constructor(
     private inputRepository: InputRepository
   ) { }
+
+  @Authorized(['root', 'buchhalter'])
+  @Get('/v1/input')
+  async getPages(
+    @QueryParams() params: GetPageInputParams
+    ) {
+    const {
+      pageID,
+      startDate,
+      endDate
+    } = params
+
+    const inputPeriod = await this.inputRepository.getByPageIDs(
+      [parseInt(pageID, 10)],
+      new Date(startDate),
+      new Date(endDate)
+    )
+    return inputPeriod
+  }
 
   @OnUndefined(204)
   @Authorized(['root'])
