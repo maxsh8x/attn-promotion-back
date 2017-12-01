@@ -108,8 +108,14 @@ export class CountParams {
 }
 
 export class GetPagesParams extends BasePaginationParams {
-  @IsString()
+  @IsISO8601()
   yDate: string
+
+  @IsISO8601()
+  startDate: string
+
+  @IsISO8601()
+  endDate: string
 
   @IsBooleanString()
   active: string
@@ -283,7 +289,16 @@ export class PageController {
   async getPages(
     @QueryParams() params: GetPagesParams
     ) {
-    const { yDate, limit, offset, filter, active, clients: rawClients } = params
+    const {
+      yDate,
+      startDate,
+      endDate,
+      limit,
+      offset,
+      filter,
+      active,
+      clients: rawClients
+    } = params
     // TODO: class-validator
     const clients = rawClients
       .split(',')
@@ -297,13 +312,13 @@ export class PageController {
       filter,
       clients
     })
-    const input = await this.inputRepository.getByPageIDs(
+    const inputDay = await this.inputRepository.getByPageIDs(
       pages.map((item: any) => item._id),
       yDate
     )
     return {
       pages,
-      input,
+      inputDay,
       sources,
       activePages,
       inactivePages
