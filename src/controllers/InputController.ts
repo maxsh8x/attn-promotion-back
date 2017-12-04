@@ -11,7 +11,7 @@ import {
 import {
   IsPositive,
   IsString,
-  IsNumber,
+  Min,
   IsISO8601,
   IsNumberString
 } from 'class-validator'
@@ -30,7 +30,7 @@ export class UpdateInputParams {
   @IsISO8601()
   yDate: string
 
-  @IsNumber()
+  @Min(0)
   value: number
 }
 
