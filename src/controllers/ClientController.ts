@@ -341,7 +341,7 @@ export class ClientController {
     @Param('clientID') clientID: number,
     @Body() params: any
     ) {
-    const allowedFields = ['name', 'brand', 'vatin']
+    const allowedFields = ['name', 'brand', 'vatin', 'counterID']
     for (let param in params) {
       if (allowedFields.indexOf(param) === -1) {
         throw new BadRequestError('INVALID_FIELD')
