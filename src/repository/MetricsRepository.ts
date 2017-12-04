@@ -108,6 +108,16 @@ export class MetricsRepository {
     }
   }
 
+  removeMetrics(page: number, startDate: Date, endDate: Date) {
+    return Metrics.remove({
+      page,
+      date: {
+        $gte: startDate,
+        $lte: endDate
+      }
+    })
+  }
+
   async getYMetricsPeriod(startURLPath: string, counterID: number, startDate: string, endDate: string) {
     const basicParams = {
       ids: counterID,

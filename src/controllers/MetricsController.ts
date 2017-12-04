@@ -2,6 +2,7 @@ import { Service } from 'typedi'
 import {
   Get,
   Post,
+  Delete,
   Body,
   JsonController,
   Authorized,
@@ -26,6 +27,17 @@ import { CHART_INTERVAL_TYPE, CHART_INTERVAL_ARRAY } from '../constants'
 export class UpdateMetricsParams {
   @IsPositive()
   pageID: number
+
+  @IsISO8601()
+  startDate: string
+
+  @IsISO8601()
+  endDate: string
+}
+
+export class DeleteMetricsParams {
+  @IsNumberString()
+  pageID: string
 
   @IsISO8601()
   startDate: string
@@ -112,6 +124,20 @@ export class MetricsController {
     ) {
     const { pageID, startDate, endDate } = params
     await this.metricsRepository.updateMetrics(pageID, startDate, endDate)
+  }
+
+  @OnUndefined(204)
+  @Authorized(['root'])
+  @Delete('/v1/metrics')
+  async removeMetrics(
+    @QueryParams() params: DeleteMetricsParams
+    ) {
+    const { pageID, startDate, endDate } = params
+    await this.metricsRepository.removeMetrics(
+      parseInt(pageID, 10),
+      new Date(startDate),
+      new Date(endDate)
+    )
   }
 
   @Authorized(['root', 'buchhalter'])
