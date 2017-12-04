@@ -2,7 +2,7 @@ import { Service } from 'typedi'
 import { Page } from '../models/Page'
 import { Archive } from '../models/Archive'
 import { QUESTION_VARIANT_TYPE, CLIENT_TABS } from '../constants'
-import { getViewsProjections } from '../utils/metrics'
+import { getViewsProjections, getClicksCostsProjections } from '../utils/metrics'
 
 const Fawn = require('fawn')
 
@@ -440,6 +440,14 @@ export class PageRepository {
         }
       },
       {
+        $lookup: {
+          from: 'inputs',
+          localField: '_id',
+          foreignField: 'page',
+          as: 'inputs'
+        }
+      },
+      {
         $project: {
           ...fields,
           costPerClick: '$meta.costPerClick',
@@ -448,6 +456,10 @@ export class PageRepository {
           maxViews: '$meta.maxViews',
           startDate: '$meta.startDate',
           endDate: '$meta.endDate',
+          ...getClicksCostsProjections(
+            '$meta.startDate',
+            '$meta.endDate'
+          ),
           ...getViewsProjections(
             startDate,
             endDate,

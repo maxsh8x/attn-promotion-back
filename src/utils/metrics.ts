@@ -73,6 +73,50 @@ export const convertToDate = (
     .format('DD-MM-YYYY')
 }
 
+export const getClicksCostsProjections = (
+  fieldStart: string,
+  fieldEnd: string
+) => ({
+  inputCost: {
+    $reduce: {
+      input: {
+        $filter: {
+          input: '$inputs',
+          as: 'item',
+          cond: {
+            $and: [
+              { $gte: ['$$item.date', fieldStart] },
+              { $lte: ['$$item.date', fieldEnd] },
+              { $eq: ['$$item.type', 'cost'] }
+            ]
+          }
+        }
+      },
+      initialValue: 0,
+      in: { $add: ['$$value', '$$this.value'] }
+    }
+  },
+  inputClicks: {
+    $reduce: {
+      input: {
+        $filter: {
+          input: '$inputs',
+          as: 'item',
+          cond: {
+            $and: [
+              { $gte: ['$$item.date', fieldStart] },
+              { $lte: ['$$item.date', fieldEnd] },
+              { $eq: ['$$item.type', 'clicks'] }
+            ]
+          }
+        }
+      },
+      initialValue: 0,
+      in: { $add: ['$$value', '$$this.value'] }
+    }
+  }
+})
+
 export const getViewsProjections = (
   startDate: Date,
   endDate: Date,
