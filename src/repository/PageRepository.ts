@@ -136,7 +136,7 @@ export class PageRepository {
             ...doc.meta[0],
             page
           }))
-          .run({ useMongoose: true })
+          .run()
       )
   }
 
@@ -175,8 +175,8 @@ export class PageRepository {
               }
             }
           })
-          .remove(doc)
-          .run({ useMongoose: true })
+          .remove("archives", { _id: doc._id })
+          .run()
       }
       )
   }

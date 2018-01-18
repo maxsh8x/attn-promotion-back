@@ -1,6 +1,7 @@
 import { Service } from 'typedi'
 import { Archive } from '../models/Archive'
-import { getViewsProjections } from '../utils/metrics';
+import { getViewsProjections, getClicksCostsProjections } from '../utils/metrics';
+
 
 type types = 'all' | 'group' | 'individual'
 
@@ -79,6 +80,14 @@ export class ArchiveRepository {
       },
       { $unwind: '$page' },
       {
+        $lookup: {
+          from: 'inputs',
+          localField: 'meta.page',
+          foreignField: 'page',
+          as: 'inputs'
+        }
+      },
+      {
         $project: {
           _id: '$meta.page',
           archiveID: '$meta._id',
@@ -95,6 +104,10 @@ export class ArchiveRepository {
           ...getViewsProjections(
             startDate,
             endDate,
+            '$meta.startDate',
+            '$meta.endDate'
+          ),
+          ...getClicksCostsProjections(
             '$meta.startDate',
             '$meta.endDate'
           )

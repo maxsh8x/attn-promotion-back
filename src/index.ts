@@ -38,9 +38,7 @@ useContainer(Container);
   })
   expressApp.set('etag', false)
 
-  await mongoose.connect(config.mongoDB, {
-    useMongoClient: true
-  })
+  await mongoose.connect(config.mongoDB)
   Fawn.init(mongoose)
 
   const agenda = new Agenda({ db: { address: config.agendaMongoDB } })
